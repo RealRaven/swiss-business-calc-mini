@@ -1,0 +1,1 @@
+# swiss-business-calc-mini
