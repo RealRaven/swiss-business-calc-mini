@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="costs_title">Operating Costs – Business Calculation CH</title>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">📊 <span data-i18n="brand">Business Calculation <span>Switzerland</span></span></div>
+    <div class="nav-apps">
+      <button class="nav-apps-toggle" id="nav-apps-toggle" aria-label="Menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+      <div class="nav-apps-dropdown" id="nav-apps-dropdown">
+        <a href="../index.html" data-i18n="nav_overview">Overview</a>
+        <a href="masterdata.html" data-i18n="nav_master">Master Data</a>
+        <a href="private.html" data-i18n="nav_private">Private Budget</a>
+        <a href="investments.html" data-i18n="nav_invest">Investments</a>
+        <a href="costs.html" data-i18n="nav_costs">Operating Costs</a>
+        <a href="revenue.html" data-i18n="nav_revenue">Revenue</a>
+        <a href="profit.html" data-i18n="nav_profit">Profit</a>
+        <a href="liquidity.html" data-i18n="nav_liquidity">Liquidity</a>
+        <a href="hourlyrate.html" data-i18n="nav_hourly">Hourly Rate</a>
+        <a href="productcalc.html" data-i18n="nav_productcalc">Product Calculation</a>
+      </div>
+    </div>
+    <div class="lang-switcher">
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+    <button class="btn btn-sm" id="btn-pdf" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);white-space:nowrap;" onclick="App.exportPDF()" data-i18n="pdf">PDF</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-header">
+    <h1 data-i18n="costs_title">Operating Costs Year 1</h1>
+    <p data-i18n="costs_desc">Record all ongoing fixed costs of your company. Costs should be entered as net amounts (without VAT).</p>
+  </div>
+
+  <div class="info-box">
+    <span data-i18n="costs_note">Note: Enter costs net (input tax deductible). If you are not VAT-liable, enter gross amounts. Distribution across months is automatic based on payment frequency and start month.</span>
+  </div>
+
+  <div id="kosten-container"></div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="costs_summary">Operating Costs Summary</div>
+    <div class="card-body">
+      <div class="grid grid-4">
+        <div class="summary-box warning">
+          <div class="label" data-i18n="costs_avg_month">Ø Costs / Month</div>
+          <div class="value" id="kost-sum-m">CHF 0.00</div>
+        </div>
+        <div class="summary-box warning">
+          <div class="label" data-i18n="costs_year">Costs / Year</div>
+          <div class="value" id="kost-sum-j">CHF 0.00</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../src/js/i18n.js"></script>
+<script src="../src/js/app.js"></script>
+<script>
+const zahlweisen = [
+  {v:'monatlich', k:'monthly'},
+  {v:'zweimonatlich', k:'bimonthly'},
+  {v:'quartalsweise', k:'quarterly'},
+  {v:'halbjaehrlich', k:'halfyearly'},
+  {v:'jaerlich', k:'yearly'}
+];
+const kats = [
+  {key:'personal'},{key:'hilfsstoffe'},{key:'raumkosten'},{key:'reparatur'},
+  {key:'buero'},{key:'marketing'},{key:'kommunikation'},{key:'leasing'},
+  {key:'bank'},{key:'steuerberatung'},{key:'beratung'},{key:'gebuehren'},
+  {key:'kfz'},{key:'versicherungen'},{key:'weiterbildung'},{key:'geringwertig'},
+  {key:'software'},{key:'sonstiges1'},{key:'sonstiges2'},{key:'sonstiges3'}
+];
+
+function buildKosten() {
+  const container = document.getElementById('kosten-container');
+  container.innerHTML = '';
+  kats.forEach(kat => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="card-header">${App.t('costs_cat_'+kat.key)}<span style="font-size:0.8rem;opacity:0.8">${App.t('costs_cat_'+kat.key+'_ex')}</span></div>
+      <div class="card-body"><div class="table-wrap"><table id="tbl-${kat.key}"><thead><tr>
+        <th>${App.t('costs_col_desc')}</th>
+        <th>${App.t('costs_col_amount')}</th>
+        <th>${App.t('costs_col_freq')}</th>
+        <th>${App.t('costs_col_start')}</th>
+        <th>${App.t('costs_col_avg')}</th>
+        <th></th>
+      </tr></thead><tbody></tbody></table></div>
+      <button class="btn btn-outline btn-sm mt-1" onclick="addKostenRow('${kat.key}')">${App.t('costs_add')}</button></div>`;
+    container.appendChild(card);
+    renderKat(kat.key);
+  });
+}
+
+function renderKat(key) {
+  const d = App.getData().betriebliche_kosten_jahr1.kategorien[key].eintraege;
+  const tbody = document.querySelector('#tbl-' + key + ' tbody');
+  tbody.innerHTML = '';
+  d.forEach((row, i) => {
+    const monatlich = App.monatlicherBetrag(row.betrag, row.zahlweise);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><input class="form-control" value="${row.bezeichnung||''}" data-kat="${key}" data-i="${i}" data-f="bezeichnung"></td>
+      <td><input type="number" class="form-control" value="${row.betrag}" data-kat="${key}" data-i="${i}" data-f="betrag"></td>
+      <td><select class="form-control" data-kat="${key}" data-i="${i}" data-f="zahlweise">${zahlweisen.map(z => `<option value="${z.v}"${z.v===row.zahlweise?' selected':''}>${App.t(z.k)}</option>`).join('')}</select></td>
+      <td><input type="number" class="form-control" style="width:70px" min="1" max="12" value="${row.startmonat||1}" data-kat="${key}" data-i="${i}" data-f="startmonat"></td>
+      <td class="num">${App.fmt(monatlich)}</td>
+      <td><button class="btn btn-sm btn-outline" style="color:var(--danger);border-color:var(--danger)" onclick="delKostenRow('${key}',${i})">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  bindKostenInputs();
+  updateSummary();
+}
+
+function bindKostenInputs() {
+  document.querySelectorAll('input[data-kat], select[data-kat]').forEach(el => {
+    el.onchange = () => {
+      const d = App.getData().betriebliche_kosten_jahr1.kategorien[el.dataset.kat].eintraege[el.dataset.i];
+      let v = el.type === 'number' ? App.parseVal(el.value) : el.value;
+      d[el.dataset.f] = v;
+      App.save();
+      const row = el.closest('tr');
+      if (row) {
+        const idx = parseInt(el.dataset.i);
+        const rowData = App.getData().betriebliche_kosten_jahr1.kategorien[el.dataset.kat].eintraege[idx];
+        const monatlich = App.monatlicherBetrag(rowData.betrag, rowData.zahlweise);
+        const monatCell = row.querySelector('.num');
+        if (monatCell) monatCell.textContent = App.fmt(monatlich);
+      }
+      updateSummary();
+    };
+  });
+}
+
+function addKostenRow(key) {
+  App.getData().betriebliche_kosten_jahr1.kategorien[key].eintraege.push({bezeichnung:'', betrag:0, zahlweise:'monatlich', startmonat:1});
+  App.save(); renderKat(key);
+}
+function delKostenRow(key, idx) {
+  App.getData().betriebliche_kosten_jahr1.kategorien[key].eintraege.splice(idx, 1);
+  App.save(); renderKat(key);
+}
+function updateSummary() {
+  const c = App.calcBetrieblicheKosten();
+  document.getElementById('kost-sum-m').textContent = 'CHF ' + App.fmt(c.gesamtMonatlich);
+  document.getElementById('kost-sum-j').textContent = 'CHF ' + App.fmt(c.gesamtJaehrlich);
+}
+window.pageInit = buildKosten;
+</script>
+</body>
+</html>

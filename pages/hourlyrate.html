@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="hourly_title">Stundensatz – Business Kalkulation CH</title>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">📊 <span data-i18n="brand">Business Kalkulation <span>Schweiz</span></span></div>
+    <div class="nav-apps">
+      <button class="nav-apps-toggle" id="nav-apps-toggle" aria-label="Menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+      <div class="nav-apps-dropdown" id="nav-apps-dropdown">
+        <a href="../index.html" data-i18n="nav_overview">Overview</a>
+        <a href="masterdata.html" data-i18n="nav_master">Master Data</a>
+        <a href="private.html" data-i18n="nav_private">Private Budget</a>
+        <a href="investments.html" data-i18n="nav_invest">Investments</a>
+        <a href="costs.html" data-i18n="nav_costs">Operating Costs</a>
+        <a href="revenue.html" data-i18n="nav_revenue">Revenue</a>
+        <a href="profit.html" data-i18n="nav_profit">Profit</a>
+        <a href="liquidity.html" data-i18n="nav_liquidity">Liquidity</a>
+        <a href="hourlyrate.html" data-i18n="nav_hourly">Hourly Rate</a>
+        <a href="productcalc.html" data-i18n="nav_productcalc">Product Calculation</a>
+      </div>
+    </div>
+    <div class="lang-switcher">
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+    <button class="btn btn-sm" id="btn-pdf" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);white-space:nowrap;" onclick="App.exportPDF()" data-i18n="pdf">PDF</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-header">
+    <h1 data-i18n="hourly_heading">Stundensatz-Kalkulation</h1>
+    <p data-i18n="hourly_desc">Berechnen Sie Ihren Mindest-, Vollkosten- und Zielstundensatz inkl. Mehrwertsteuer.</p>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-header" data-i18n="hourly_params">Arbeitszeit-Parameter</div>
+      <div class="card-body">
+        <div class="form-group"><label data-i18n="hourly_total_hours">Gesamtarbeitszeit / Woche (Std)</label><input type="number" class="form-control" id="st-gesamt"></div>
+        <div class="form-group"><label data-i18n="hourly_non_billable">Nicht verrechenbar / Woche (Std)</label><input type="number" class="form-control" id="st-nicht"></div>
+        <div class="form-group"><label data-i18n="hourly_vacation">Urlaub (Wochen)</label><input type="number" class="form-control" id="st-urlaub"></div>
+        <div class="form-group"><label data-i18n="hourly_sick">Krankheit/Feiertage (Wochen)</label><input type="number" class="form-control" id="st-krank"></div>
+        <div class="form-group"><label data-i18n="hourly_utilization">Auslastungsgrad (0–1)</label><input type="number" step="0.05" class="form-control" id="st-auslast"></div>
+        <div class="form-group"><label data-i18n="hourly_target_profit">Zielgewinn / Jahr (CHF)</label><input type="number" class="form-control" id="st-ziel"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-i18n="hourly_result">Ergebnis Stundensatz</div>
+      <div class="card-body">
+        <div class="summary-box warning mt-1">
+          <div class="label" data-i18n="hourly_billable_weeks">Verrechenbare Wochen / Jahr</div>
+          <div class="value" id="st-wochen">0</div>
+        </div>
+        <div class="summary-box mt-1">
+          <div class="label" data-i18n="hourly_billable_hours">Verrechenbare Stunden / Jahr</div>
+          <div class="value" id="st-stunden">0</div>
+        </div>
+        <table class="mt-2">
+          <thead><tr>
+            <th data-i18n="hourly_metric">Kennzahl</th>
+            <th data-i18n="hourly_net">Netto (CHF)</th>
+            <th data-i18n="hourly_vat">+ MWST</th>
+            <th data-i18n="hourly_gross">Brutto (CHF)</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><strong data-i18n="hourly_rate_full">Vollkosten-Stundensatz</strong><br><small data-i18n="hourly_rate_full_desc">Deckt alle Betriebskosten</small></td>
+              <td class="num" id="r-voll">0.00</td>
+              <td class="num" id="r-voll-mwst">0.00</td>
+              <td class="num" id="r-voll-br">0.00</td>
+            </tr>
+            <tr>
+              <td><strong data-i18n="hourly_rate_min">Mindest-Stundensatz</strong><br><small data-i18n="hourly_rate_min_desc">Deckt Kosten + Privatbudget</small></td>
+              <td class="num" id="r-min">0.00</td>
+              <td class="num" id="r-min-mwst">0.00</td>
+              <td class="num" id="r-min-br">0.00</td>
+            </tr>
+            <tr style="background:#051428">
+              <td><strong data-i18n="hourly_rate_target">Ziel-Stundensatz</strong><br><small data-i18n="hourly_rate_target_desc">Deckt Kosten + Privatbudget + Gewinn</small></td>
+              <td class="num" id="r-ziel">0.00</td>
+              <td class="num" id="r-ziel-mwst">0.00</td>
+              <td class="num" id="r-ziel-br">0.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../src/js/i18n.js"></script>
+<script src="../src/js/app.js"></script>
+<script>
+function initPage() {
+  const s = App.getData().stundensatz;
+  document.getElementById('st-gesamt').value = s.gesamtarbeitszeit_woche;
+  document.getElementById('st-nicht').value = s.nicht_verrechenbar_std_woche;
+  document.getElementById('st-urlaub').value = s.urlaub_wochen;
+  document.getElementById('st-krank').value = s.krankheit_wochen;
+  document.getElementById('st-auslast').value = s.auslastungsgrad;
+  document.getElementById('st-ziel').value = s.zielgewinn_jahr;
+  ['gesamt','nicht','urlaub','krank','auslast','ziel'].forEach(k => {
+    document.getElementById('st-'+k).addEventListener('change', () => {
+      const map = {gesamt:'gesamtarbeitszeit_woche',nicht:'nicht_verrechenbar_std_woche',urlaub:'urlaub_wochen',krank:'krankheit_wochen',auslast:'auslastungsgrad',ziel:'zielgewinn_jahr'};
+      App.getData().stundensatz[map[k]] = App.parseVal(document.getElementById('st-'+k).value);
+      App.save(); renderSt();
+    });
+  });
+  renderSt();
+}
+function renderSt() {
+  const c = App.calcStundensatz();
+  document.getElementById('st-wochen').textContent = App.fmtInt(c.wochen);
+  document.getElementById('st-stunden').textContent = App.fmtInt(c.verrechenbar);
+  const rows = [
+    {basis: c.basisVoll, pre: 'r-voll'}, {basis: c.basisMin, pre: 'r-min'}, {basis: c.basisZiel, pre: 'r-ziel'}
+  ];
+  rows.forEach(r => {
+    const mwst = r.basis * c.mwst;
+    document.getElementById(r.pre).textContent = App.fmt(r.basis);
+    document.getElementById(r.pre+'-mwst').textContent = App.fmt(mwst);
+    document.getElementById(r.pre+'-br').textContent = App.fmt(r.basis + mwst);
+  });
+}
+window.pageInit = initPage;
+</script>
+</body>
+</html>

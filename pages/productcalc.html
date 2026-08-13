@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="productcalc_title">Produktkalkulation – Business Kalkulation CH</title>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">📊 <span data-i18n="brand">Business Kalkulation <span>Schweiz</span></span></div>
+    <div class="nav-apps">
+      <button class="nav-apps-toggle" id="nav-apps-toggle" aria-label="Menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+      <div class="nav-apps-dropdown" id="nav-apps-dropdown">
+        <a href="../index.html" data-i18n="nav_overview">Overview</a>
+        <a href="masterdata.html" data-i18n="nav_master">Master Data</a>
+        <a href="private.html" data-i18n="nav_private">Private Budget</a>
+        <a href="investments.html" data-i18n="nav_invest">Investments</a>
+        <a href="costs.html" data-i18n="nav_costs">Operating Costs</a>
+        <a href="revenue.html" data-i18n="nav_revenue">Revenue</a>
+        <a href="profit.html" data-i18n="nav_profit">Profit</a>
+        <a href="liquidity.html" data-i18n="nav_liquidity">Liquidity</a>
+        <a href="hourlyrate.html" data-i18n="nav_hourly">Hourly Rate</a>
+        <a href="productcalc.html" data-i18n="nav_productcalc">Product Calculation</a>
+      </div>
+    </div>
+    <div class="lang-switcher">
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+    <button class="btn btn-sm" id="btn-pdf" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);white-space:nowrap;" onclick="App.exportPDF()" data-i18n="pdf">PDF</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-header">
+    <h1 data-i18n="nav_productcalc">Produktkalkulation</h1>
+    <p data-i18n="productcalc_desc">Kalkulieren Sie Selbstkostenpreis, Verkaufspreis und Deckungsbeitrag für bis zu 4 Produkte oder Leistungen.</p>
+  </div>
+
+  <div class="info-box">
+    <span data-i18n="productcalc_info">Die Gemeinkosten decken indirekte Kosten wie Verwaltung, Miete, Marketing. Die Gewinnmarge ergibt den Verkaufspreis. Der Deckungsbeitrag zeigt, wie viel pro Stück nach Abzug der direkten Kosten übrig bleibt.</span>
+  </div>
+
+  <div id="produkte-container"></div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="productcalc_summary">Zusammenfassung aller Produkte</div>
+    <div class="card-body">
+      <div class="grid grid-4">
+        <div class="summary-box"><div class="label" data-i18n="productcalc_total_material">Material gesamt</div><div class="value" id="pc-mat">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="productcalc_total_labor">Lohn gesamt</div><div class="value" id="pc-lohn">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="productcalc_total_overhead">Gemeinkosten gesamt</div><div class="value" id="pc-gk">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="productcalc_total_costs_year">Selbstkosten gesamt</div><div class="value" id="pc-sk">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="productcalc_total_profit_year">Gewinn gesamt</div><div class="value" id="pc-gew">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="productcalc_total_net_year">Netto-Umsatz gesamt</div><div class="value" id="pc-net">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="productcalc_total_vat_year">MWST gesamt</div><div class="value" id="pc-mwst">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="productcalc_total_gross_year">Brutto-Umsatz gesamt</div><div class="value" id="pc-brutto">CHF 0.00</div></div>
+      </div>
+      <div class="summary-box success mt-1" style="margin-top:1rem">
+        <div class="label" data-i18n="productcalc_total_contribution_year">Deckungsbeitrag gesamt</div>
+        <div class="value" id="pc-deck">CHF 0.00</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../src/js/i18n.js"></script>
+<script src="../src/js/app.js"></script>
+<script>
+const mwstOptionen = [
+  {v:8.1, k:'vat_normal'},
+  {v:2.6, k:'vat_reduced'},
+  {v:3.8, k:'vat_special'},
+  {v:0, k:'vat_exempt'}
+];
+
+function buildProdukte() {
+  const container = document.getElementById('produkte-container');
+  container.innerHTML = '';
+  const d = App.getData().produktkalkulation.produkte;
+  d.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<div class="card-header">' + 
+      '<input class="form-control" style="width:220px;display:inline-block;" value="' + p.bezeichnung + '" data-idx="' + idx + '" data-f="bezeichnung">' +
+      '<button class="btn btn-sm btn-outline" style="margin-left:10px;color:var(--accent);border-color:var(--accent)" onclick="applyHourlyRate(' + idx + ')" data-i18n="productcalc_use_hourly_rate">Stundensatz übernehmen</button>' +
+      '</div>' +
+      '<div class="card-body">' +
+      '<div class="grid grid-4">' +
+      '<div class="form-group"><label data-i18n="productcalc_material_costs">Materialkosten (CHF)</label><input type="number" class="form-control" value="' + p.materialkosten + '" data-idx="' + idx + '" data-f="materialkosten"></div>' +
+      '<div class="form-group"><label data-i18n="productcalc_labor_hours">Arbeitszeit (Std)</label><input type="number" step="0.1" class="form-control" value="' + p.arbeitszeit_std + '" data-idx="' + idx + '" data-f="arbeitszeit_std"></div>' +
+      '<div class="form-group"><label data-i18n="productcalc_hourly_rate">Stundensatz (CHF/Std)</label><input type="number" class="form-control" value="' + p.stundensatz + '" data-idx="' + idx + '" data-f="stundensatz" id="stundensatz-' + idx + '"></div>' +
+      '<div class="form-group"><label data-i18n="productcalc_overhead_pct">Gemeinkostenzuschlag (%)</label><input type="number" class="form-control" value="' + p.gemeinkosten_zuschlag_pct + '" data-idx="' + idx + '" data-f="gemeinkosten_zuschlag_pct"></div>' +
+      '<div class="form-group"><label data-i18n="productcalc_profit_margin_pct">Gewinnmarge (%)</label><input type="number" class="form-control" value="' + p.gewinnmarge_pct + '" data-idx="' + idx + '" data-f="gewinnmarge_pct"></div>' +
+      '<div class="form-group"><label data-i18n="productcalc_vat_rate">MWST-Satz</label><select class="form-control" data-idx="' + idx + '" data-f="mwst_satz">' + mwstOptionen.map(o => '<option value="' + o.v + '"' + (Math.abs(o.v - p.mwst_satz)<0.01?' selected':'') + '>' + App.t(o.k) + '</option>').join('') + '</select></div>' +
+      '<div class="form-group"><label data-i18n="productcalc_quantity_year">Menge / Jahr</label><input type="number" class="form-control" value="' + p.menge_jahr + '" data-idx="' + idx + '" data-f="menge_jahr"></div>' +
+      '</div>' +
+      '<div class="mt-2" style="overflow-x:auto"><table style="font-size:0.85rem"><thead><tr>' +
+      '<th></th><th data-i18n="productcalc_per_unit">pro Stück</th><th data-i18n="productcalc_per_year">pro Jahr</th>' +
+      '</tr></thead><tbody>' +
+      '<tr><td data-i18n="productcalc_material_costs">Materialkosten</td><td class="num" id="pc-' + idx + '-mat">0.00</td><td class="num" id="pc-' + idx + '-mat-j">0.00</td></tr>' +
+      '<tr><td data-i18n="productcalc_labor_costs">Lohnkosten</td><td class="num" id="pc-' + idx + '-lohn">0.00</td><td class="num" id="pc-' + idx + '-lohn-j">0.00</td></tr>' +
+      '<tr><td data-i18n="productcalc_manufacturing_costs">Fertigungskosten</td><td class="num" id="pc-' + idx + '-fert">0.00</td><td class="num" id="pc-' + idx + '-fert-j">0.00</td></tr>' +
+      '<tr><td data-i18n="productcalc_overhead">Gemeinkosten</td><td class="num" id="pc-' + idx + '-gk">0.00</td><td class="num" id="pc-' + idx + '-gk-j">0.00</td></tr>' +
+      '<tr style="font-weight:700"><td data-i18n="productcalc_total_costs">Selbstkosten</td><td class="num" id="pc-' + idx + '-sk">0.00</td><td class="num" id="pc-' + idx + '-sk-j">0.00</td></tr>' +
+      '<tr><td data-i18n="productcalc_profit">Gewinn</td><td class="num" id="pc-' + idx + '-gew">0.00</td><td class="num" id="pc-' + idx + '-gew-j">0.00</td></tr>' +
+      '<tr style="font-weight:700;background:#051428"><td data-i18n="productcalc_net_price">Netto-Verkaufspreis</td><td class="num" id="pc-' + idx + '-net">0.00</td><td class="num" id="pc-' + idx + '-net-j">0.00</td></tr>' +
+      '<tr><td data-i18n="productcalc_vat_amount">MWST</td><td class="num" id="pc-' + idx + '-mwst">0.00</td><td class="num" id="pc-' + idx + '-mwst-j">0.00</td></tr>' +
+      '<tr style="font-weight:700"><td data-i18n="productcalc_gross_price">Brutto-Verkaufspreis</td><td class="num" id="pc-' + idx + '-brutto">0.00</td><td class="num" id="pc-' + idx + '-brutto-j">0.00</td></tr>' +
+      '<tr style="background:#1b381f"><td data-i18n="productcalc_contribution_margin">Deckungsbeitrag</td><td class="num" id="pc-' + idx + '-deck">0.00</td><td class="num" id="pc-' + idx + '-deck-j">0.00</td></tr>' +
+      '</tbody></table></div>' +
+      '</div>';
+    container.appendChild(card);
+  });
+  bindInputs();
+  renderCalc();
+  App.applyLanguage(); // ← FIX: Übersetzt alle dynamisch erzeugten data-i18n Elemente
+}
+
+function bindInputs() {
+  document.querySelectorAll('input[data-idx], select[data-idx]').forEach(el => {
+    el.onchange = () => {
+      const d = App.getData().produktkalkulation.produkte[el.dataset.idx];
+      if (el.dataset.f === 'bezeichnung') d.bezeichnung = el.value;
+      else if (el.dataset.f === 'mwst_satz') d.mwst_satz = App.parseVal(el.value);
+      else d[el.dataset.f] = App.parseVal(el.value);
+      App.save(); renderCalc();
+    };
+  });
+}
+
+function applyHourlyRate(idx) {
+  const st = App.calcStundensatz();
+  const basis = st.basisZiel || st.basisMin || st.basisVoll || 0;
+  if (basis > 0) {
+    App.getData().produktkalkulation.produkte[idx].stundensatz = Math.round(basis * 100) / 100;
+    App.save();
+    document.getElementById('stundensatz-' + idx).value = App.fmt(basis);
+    renderCalc();
+    App.showStatus(App.t('productcalc_use_hourly_rate') + ': CHF ' + App.fmt(basis), 'success');
+  } else {
+    App.showStatus('Stundensatz = 0 – bitte zuerst Stundensatz-Seite ausfüllen', 'error');
+  }
+}
+
+function renderCalc() {
+  const c = App.calcProduktkalkulation();
+  c.produkte.forEach((p, idx) => {
+    document.getElementById('pc-' + idx + '-mat').textContent = App.fmt(p.materialkosten);
+    document.getElementById('pc-' + idx + '-mat-j').textContent = App.fmt(p.jahrMaterial);
+    document.getElementById('pc-' + idx + '-lohn').textContent = App.fmt(p.lohnkosten);
+    document.getElementById('pc-' + idx + '-lohn-j').textContent = App.fmt(p.jahrLohn);
+    document.getElementById('pc-' + idx + '-fert').textContent = App.fmt(p.fertigungskosten);
+    document.getElementById('pc-' + idx + '-fert-j').textContent = App.fmt(p.jahrMaterial + p.jahrLohn);
+    document.getElementById('pc-' + idx + '-gk').textContent = App.fmt(p.gemeinkosten);
+    document.getElementById('pc-' + idx + '-gk-j').textContent = App.fmt(p.jahrGemeinkosten);
+    document.getElementById('pc-' + idx + '-sk').textContent = App.fmt(p.selbstkosten);
+    document.getElementById('pc-' + idx + '-sk-j').textContent = App.fmt(p.jahrSelbstkosten);
+    document.getElementById('pc-' + idx + '-gew').textContent = App.fmt(p.gewinn);
+    document.getElementById('pc-' + idx + '-gew-j').textContent = App.fmt(p.jahrGewinn);
+    document.getElementById('pc-' + idx + '-net').textContent = App.fmt(p.netto);
+    document.getElementById('pc-' + idx + '-net-j').textContent = App.fmt(p.jahrNetto);
+    document.getElementById('pc-' + idx + '-mwst').textContent = App.fmt(p.mwst);
+    document.getElementById('pc-' + idx + '-mwst-j').textContent = App.fmt(p.jahrMwst);
+    document.getElementById('pc-' + idx + '-brutto').textContent = App.fmt(p.brutto);
+    document.getElementById('pc-' + idx + '-brutto-j').textContent = App.fmt(p.jahrBrutto);
+    document.getElementById('pc-' + idx + '-deck').textContent = App.fmt(p.deckungsbeitrag);
+    document.getElementById('pc-' + idx + '-deck-j').textContent = App.fmt(p.jahrDeckung);
+  });
+  document.getElementById('pc-mat').textContent = 'CHF ' + App.fmt(c.gesamtMaterial);
+  document.getElementById('pc-lohn').textContent = 'CHF ' + App.fmt(c.gesamtLohn);
+  document.getElementById('pc-gk').textContent = 'CHF ' + App.fmt(c.gesamtGemeinkosten);
+  document.getElementById('pc-sk').textContent = 'CHF ' + App.fmt(c.gesamtSelbstkosten);
+  document.getElementById('pc-gew').textContent = 'CHF ' + App.fmt(c.gesamtGewinn);
+  document.getElementById('pc-net').textContent = 'CHF ' + App.fmt(c.gesamtNetto);
+  document.getElementById('pc-mwst').textContent = 'CHF ' + App.fmt(c.gesamtMwst);
+  document.getElementById('pc-brutto').textContent = 'CHF ' + App.fmt(c.gesamtBrutto);
+  document.getElementById('pc-deck').textContent = 'CHF ' + App.fmt(c.gesamtDeckung);
+}
+
+window.pageInit = buildProdukte;
+</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="src/css/style.css"><title data-i18n="brand">Business Kalkulation Schweiz</title>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">📊 <span data-i18n="brand">Business Kalkulation Schweiz</span></div>
+    <div class="nav-apps">
+      <button class="nav-apps-toggle" id="nav-apps-toggle" aria-label="Menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+      <div class="nav-apps-dropdown" id="nav-apps-dropdown">
+        <a href="index.html" data-i18n="nav_overview">Overview</a>
+        <a href="pages/masterdata.html" data-i18n="nav_master">Master Data</a>
+        <a href="pages/private.html" data-i18n="nav_private">Private Budget</a>
+        <a href="pages/investments.html" data-i18n="nav_invest">Investments</a>
+        <a href="pages/costs.html" data-i18n="nav_costs">Operating Costs</a>
+        <a href="pages/revenue.html" data-i18n="nav_revenue">Revenue</a>
+        <a href="pages/profit.html" data-i18n="nav_profit">Profit</a>
+        <a href="pages/liquidity.html" data-i18n="nav_liquidity">Liquidity</a>
+        <a href="pages/hourlyrate.html" data-i18n="nav_hourly">Hourly Rate</a>
+        <a href="pages/productcalc.html" data-i18n="nav_productcalc">Product Calculation</a>
+      </div>
+    </div>
+    <div class="lang-switcher">
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+    <button class="btn btn-sm" id="btn-pdf" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);white-space:nowrap;" onclick="App.exportPDF()" data-i18n="pdf">PDF</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-header">
+    <h1 data-i18n="brand">Business Kalkulation Schweiz</h1>
+    <p data-i18n="index_subtitle">Praktisch – zeitsparend – übersichtlich. Planen Sie Ihre Selbstständigkeit in der Schweiz.</p>
+  </div>
+
+  <div class="info-box">
+    <strong data-i18n="index_note_label">Hinweis:</strong> <span data-i18n="index_note_text">Alle Werte werden lokal im Browser gespeichert. Sie können Ihre Daten jederzeit als JSON exportieren/importieren.</span>
+    <div class="mt-1 flex gap-1">
+      <button class="btn btn-primary btn-sm" id="btn-export" data-i18n="export">💾 Exportieren</button>
+      <label class="btn btn-outline btn-sm" style="cursor:pointer" id="lbl-import">
+        <span data-i18n="import">📁 Importieren</span>
+        <input type="file" accept=".json" style="display:none" id="inp-import">
+      </label>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+    <a href="pages/masterdata.html" class="dash-card">
+      <div class="icon">🏢</div>
+      <h3 data-i18n="nav_master">Stammdaten</h3>
+      <p data-i18n="index_desc_masterdata">Firmenname, Rechtsform, Kanton, MWST-Sätze</p>
+    </a>
+    <a href="pages/private.html" class="dash-card">
+      <div class="icon">🏠</div>
+      <h3 data-i18n="nav_private">Privatbudget</h3>
+      <p data-i18n="index_desc_private">Private Ausgaben, Einnahmen, Mindesteinkommen</p>
+    </a>
+    <a href="pages/investments.html" class="dash-card">
+      <div class="icon">🖥️</div>
+      <h3 data-i18n="nav_invest">Investitionen</h3>
+      <p data-i18n="index_desc_investments">Anlagegüter, Abschreibungen, Gründungskosten</p>
+    </a>
+    <a href="pages/costs.html" class="dash-card">
+      <div class="icon">📋</div>
+      <h3 data-i18n="nav_costs">Betriebskosten</h3>
+      <p data-i18n="index_desc_costs">20 Kategorien laufender Fixkosten auf Monatsbasis</p>
+    </a>
+    <a href="pages/revenue.html" class="dash-card">
+      <div class="icon">💰</div>
+      <h3 data-i18n="nav_revenue">Umsatzplanung</h3>
+      <p data-i18n="index_desc_revenue">4 Angebotsklassen mit monatlichem Verlauf</p>
+    </a>
+    <a href="pages/profit.html" class="dash-card">
+      <div class="icon">📈</div>
+      <h3 data-i18n="nav_profit">Gewinn & Steuern</h3>
+      <p data-i18n="index_desc_profit">AHV/IV/EO, Einkommenssteuer, Nettogewinn</p>
+    </a>
+    <a href="pages/liquidity.html" class="dash-card">
+      <div class="icon">💧</div>
+      <h3 data-i18n="nav_liquidity">Liquidität</h3>
+      <p data-i18n="index_desc_liquidity">Zahlungsfähigkeit im Jahresverlauf</p>
+    </a>
+    <a href="pages/hourlyrate.html" class="dash-card">
+      <div class="icon">⏱️</div>
+      <h3 data-i18n="nav_hourly">Stundensatz</h3>
+      <p data-i18n="index_desc_hourly">Kalkulation Mindest-, Vollkosten- und Zielstundensatz</p>
+    </a>
+    <a href="pages/productcalc.html" class="dash-card">
+      <div class="icon">📦</div>
+      <h3 data-i18n="nav_productcalc">Produktkalkulation</h3>
+      <p data-i18n="index_desc_productcalc">Selbstkostenpreis, Verkaufspreis und Deckungsbeitrag pro Produkt</p>
+    </a>
+  </div>
+
+  <div class="card mt-2">
+    <div class="card-header" data-i18n="index_live_summary">Kurzübersicht (live)</div>
+    <div class="card-body">
+      <div class="grid grid-4">
+        <div class="summary-box" id="dash-umsatz">
+          <div class="label" data-i18n="index_revenue_year">Umsatz (Jahr)</div>
+          <div class="value">CHF 0.00</div>
+        </div>
+        <div class="summary-box warning" id="dash-kosten">
+          <div class="label" data-i18n="index_operating_costs">Betriebskosten</div>
+          <div class="value">CHF 0.00</div>
+        </div>
+        <div class="summary-box" id="dash-gewinn">
+          <div class="label" data-i18n="index_net_profit">Nettogewinn</div>
+          <div class="value">CHF 0.00</div>
+        </div>
+        <div class="summary-box" id="dash-liquid">
+          <div class="label" data-i18n="index_liquidity_yearend">Liquidität Jahresende</div>
+          <div class="value">CHF 0.00</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="src/js/i18n.js"></script>
+<script src="src/js/app.js"></script>
+<script>
+function updateDash() {
+  try {
+    const g = App.calcGewinn();
+    const l = App.calcLiquiditaet();
+    document.querySelector('#dash-umsatz .value').textContent = 'CHF ' + App.fmt(g.umsatz.gesamtBrutto);
+    document.querySelector('#dash-kosten .value').textContent = 'CHF ' + App.fmt(g.kosten.gesamtJaehrlich);
+    const nettoEl = document.querySelector('#dash-gewinn');
+    nettoEl.querySelector('.value').textContent = 'CHF ' + App.fmt(g.netto);
+    nettoEl.className = 'summary-box ' + (g.netto >= 0 ? 'success' : 'danger');
+    const liqEl = document.querySelector('#dash-liquid');
+    liqEl.querySelector('.value').textContent = 'CHF ' + App.fmt(l.endkum);
+    liqEl.className = 'summary-box ' + (l.endkum >= 0 ? 'success' : 'danger');
+  } catch(e) {
+    console.error('Dashboard Update Fehler:', e);
+  }
+}
+
+function setupImportExport() {
+  const exportBtn = document.getElementById('btn-export');
+  const importInp = document.getElementById('inp-import');
+
+  if (exportBtn) {
+    exportBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      App.exportJSON();
+    });
+  }
+
+  if (importInp) {
+    importInp.addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+      App.importJSON(file).then(function() {
+        setTimeout(function() { location.reload(); }, 800);
+      }).catch(function(err) {
+        console.error('Import Fehler:', err);
+      });
+      this.value = '';
+    });
+  }
+}
+
+window.pageInit = function() {
+  updateDash();
+  setupImportExport();
+};
+</script>
+</body>
+</html>
