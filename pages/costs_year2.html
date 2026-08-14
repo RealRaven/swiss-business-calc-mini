@@ -2,12 +2,12 @@
 <html lang="de">
 <head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="costs_title">Operating Costs – Business Calculation CH</title>
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="costs_jahr2_title">Betriebskosten Jahr 2</title>
 </head>
 <body>
 <nav class="navbar">
   <div class="nav-container">
-    <div class="nav-brand">📊 <span data-i18n="brand">Business Calculation <span>Switzerland</span></span></div>
+    <div class="nav-brand">📊 <span data-i18n="brand">Business Kalkulation <span>Schweiz</span></span></div>
     <div class="nav-apps">
       <button class="nav-apps-toggle" id="nav-apps-toggle" aria-label="Menu" aria-expanded="false">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -48,26 +48,26 @@
 </nav>
 <div class="container">
   <div class="page-header">
-    <h1 data-i18n="costs_title">Operating Costs Year 1</h1>
-    <p data-i18n="costs_desc">Record all ongoing fixed costs of your company. Costs should be entered as net amounts (without VAT).</p>
+    <h1 data-i18n="costs_jahr2_title">Betriebskosten Jahr 2</h1>
+    <p data-i18n="costs_desc">Erfassen Sie alle laufenden Fixkosten Ihres Unternehmens. Die Kosten sind als Nettobeträge (ohne MWST) einzutragen.</p>
   </div>
 
   <div class="info-box">
-    <span data-i18n="costs_note">Note: Enter costs net (input tax deductible). If you are not VAT-liable, enter gross amounts. Distribution across months is automatic based on payment frequency and start month.</span>
+    <span data-i18n="costs_note">Hinweis: Tragen Sie die Kosten netto ein (Vorsteuerabzug berechtigt). Falls Sie nicht MWST-pflichtig sind, erfassen Sie die Bruttobeträge. Die Verteilung auf die Monate erfolgt automatisch nach Zahlweise und Startmonat.</span>
   </div>
 
   <div id="kosten-container"></div>
 
   <div class="card">
-    <div class="card-header" data-i18n="costs_summary">Operating Costs Summary</div>
+    <div class="card-header" data-i18n="costs_summary">Zusammenfassung Betriebskosten</div>
     <div class="card-body">
       <div class="grid grid-4">
         <div class="summary-box warning">
-          <div class="label" data-i18n="costs_avg_month">Ø Costs / Month</div>
+          <div class="label" data-i18n="costs_avg_month">Ø Kosten / Monat</div>
           <div class="value" id="kost-sum-m">CHF 0.00</div>
         </div>
         <div class="summary-box warning">
-          <div class="label" data-i18n="costs_year">Costs / Year</div>
+          <div class="label" data-i18n="costs_year">Kosten / Jahr</div>
           <div class="value" id="kost-sum-j">CHF 0.00</div>
         </div>
       </div>
@@ -114,7 +114,7 @@ function buildKosten() {
 }
 
 function renderKat(key) {
-  const d = App.getData().betriebliche_kosten_jahr1.kategorien[key].eintraege;
+  const d = App.getData().betriebliche_kosten_jahr2.kategorien[key].eintraege;
   const tbody = document.querySelector('#tbl-' + key + ' tbody');
   tbody.innerHTML = '';
   d.forEach((row, i) => {
@@ -135,14 +135,14 @@ function renderKat(key) {
 function bindKostenInputs() {
   document.querySelectorAll('input[data-kat], select[data-kat]').forEach(el => {
     el.onchange = () => {
-      const d = App.getData().betriebliche_kosten_jahr1.kategorien[el.dataset.kat].eintraege[el.dataset.i];
+      const d = App.getData().betriebliche_kosten_jahr2.kategorien[el.dataset.kat].eintraege[el.dataset.i];
       let v = el.type === 'number' ? App.parseVal(el.value) : el.value;
       d[el.dataset.f] = v;
       App.save();
       const row = el.closest('tr');
       if (row) {
         const idx = parseInt(el.dataset.i);
-        const rowData = App.getData().betriebliche_kosten_jahr1.kategorien[el.dataset.kat].eintraege[idx];
+        const rowData = App.getData().betriebliche_kosten_jahr2.kategorien[el.dataset.kat].eintraege[idx];
         const monatlich = App.monatlicherBetrag(rowData.betrag, rowData.zahlweise);
         const monatCell = row.querySelector('.num');
         if (monatCell) monatCell.textContent = App.fmt(monatlich);
@@ -153,15 +153,15 @@ function bindKostenInputs() {
 }
 
 function addKostenRow(key) {
-  App.getData().betriebliche_kosten_jahr1.kategorien[key].eintraege.push({bezeichnung:'', betrag:0, zahlweise:'monatlich', startmonat:1});
+  App.getData().betriebliche_kosten_jahr2.kategorien[key].eintraege.push({bezeichnung:'', betrag:0, zahlweise:'monatlich', startmonat:1});
   App.save(); renderKat(key);
 }
 function delKostenRow(key, idx) {
-  App.getData().betriebliche_kosten_jahr1.kategorien[key].eintraege.splice(idx, 1);
+  App.getData().betriebliche_kosten_jahr2.kategorien[key].eintraege.splice(idx, 1);
   App.save(); renderKat(key);
 }
 function updateSummary() {
-  const c = App.calcBetrieblicheKosten();
+  const c = App.calcBetrieblicheKostenJahr2();
   document.getElementById('kost-sum-m').textContent = 'CHF ' + App.fmt(c.gesamtMonatlich);
   document.getElementById('kost-sum-j').textContent = 'CHF ' + App.fmt(c.gesamtJaehrlich);
 }

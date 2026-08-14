@@ -108,6 +108,51 @@ const App = (function() {
       }
     },
     liquiditaet: { startguthaben: 0, privateinlage: 0, fremdkapital: 0, foerderungen: 0 },
+    investitionen_jahr2: {
+      neu: [
+        {bezeichnung:'Laptop', betrag_brutto:0, nd:3, afa:0},
+        {bezeichnung:'Geschaeftsausstattung', betrag_brutto:0, nd:10, afa:0},
+        {bezeichnung:'Mobiltelefon', betrag_brutto:0, nd:3, afa:0},
+        {bezeichnung:'Homepage', betrag_brutto:0, nd:3, afa:0},
+        {bezeichnung:'Software', betrag_brutto:0, nd:3, afa:0}
+      ],
+      nicht_aktivierungsplichtig: [
+        {bezeichnung:'Geringwertige Anschaffung', betrag_brutto:0}
+      ]
+    },
+    betriebliche_kosten_jahr2: {
+      kategorien: {
+        personal: {eintraege: []},
+        hilfsstoffe: {eintraege: []},
+        raumkosten: {eintraege: []},
+        reparatur: {eintraege: []},
+        buero: {eintraege: []},
+        marketing: {eintraege: []},
+        kommunikation: {eintraege: []},
+        leasing: {eintraege: []},
+        bank: {eintraege: []},
+        steuerberatung: {eintraege: []},
+        beratung: {eintraege: []},
+        gebuehren: {eintraege: []},
+        kfz: {eintraege: []},
+        versicherungen: {eintraege: []},
+        weiterbildung: {eintraege: []},
+        geringwertig: {eintraege: []},
+        software: {eintraege: []},
+        sonstiges1: {eintraege: []},
+        sonstiges2: {eintraege: []},
+        sonstiges3: {eintraege: []}
+      }
+    },
+    umsatz_jahr2: {
+      angebote: [
+        {name:'Angebot A', verkaufszahlen:[0,0,0,0,0,0,0,0,0,0,0,0], einzelpreis_brutto:0, mwst_satz:8.1, ressourceneinsatz_pct:0},
+        {name:'Angebot B', verkaufszahlen:[0,0,0,0,0,0,0,0,0,0,0,0], einzelpreis_brutto:0, mwst_satz:8.1, ressourceneinsatz_pct:0},
+        {name:'Angebot C', verkaufszahlen:[0,0,0,0,0,0,0,0,0,0,0,0], einzelpreis_brutto:0, mwst_satz:8.1, ressourceneinsatz_pct:0},
+        {name:'Angebot D', verkaufszahlen:[0,0,0,0,0,0,0,0,0,0,0,0], einzelpreis_brutto:0, mwst_satz:8.1, ressourceneinsatz_pct:0}
+      ]
+    },
+    liquiditaet_jahr2: { startguthaben: 0, privateinlage: 0, fremdkapital: 0, foerderungen: 0 },
     produktkalkulation: {
       produkte: [
         {bezeichnung:'Produkt A', materialkosten:0, arbeitszeit_std:0, stundensatz:0, gemeinkosten_zuschlag_pct:20, gewinnmarge_pct:15, mwst_satz:8.1, menge_jahr:0},
@@ -399,6 +444,165 @@ const App = (function() {
     return { wochen, gesamtStd, nichtVerrechenbar, verrechenbar, basisVoll, basisMin, basisZiel, mwst };
   }
 
+  function calcInvestitionenJahr2() {
+    const inv = data.investitionen;
+    const inv2 = data.investitionen_jahr2;
+    
+    let bestehendeAfa = 0, bestehendeRest = 0;
+    const bestehendeJahr2 = (inv.bestehende || []).map(function(i) {
+      const rw = parseVal(i.restwert); const nd = parseVal(i.nd) || 1;
+      const afa = rw / nd;
+      const restJahr2 = Math.max(0, rw - afa);
+      const afaJahr2 = restJahr2 > 0.01 ? afa : 0;
+      bestehendeAfa += afaJahr2;
+      bestehendeRest += restJahr2;
+      return { bezeichnung: i.bezeichnung, restwertJahr1: rw, nd: nd, afaJahr1: afa, restwertJahr2: restJahr2, afaJahr2: afaJahr2 };
+    });
+    
+    let jahr1NeuAfa = 0, jahr1NeuRest = 0;
+    const jahr1NeuJahr2 = (inv.neu || []).map(function(i) {
+      const b = parseVal(i.betrag_brutto); const nd = parseVal(i.nd) || 1;
+      const afa = b / nd;
+      const restJahr2 = Math.max(0, b - afa);
+      const afaJahr2 = restJahr2 > 0.01 ? afa : 0;
+      jahr1NeuAfa += afaJahr2;
+      jahr1NeuRest += restJahr2;
+      return { bezeichnung: i.bezeichnung, betragJahr1: b, nd: nd, afaJahr1: afa, restwertJahr2: restJahr2, afaJahr2: afaJahr2 };
+    });
+    
+    let jahr2NeuAfa = 0, jahr2NeuBrutto = 0;
+    (inv2.neu || []).forEach(function(i) {
+      const b = parseVal(i.betrag_brutto); const nd = parseVal(i.nd) || 1;
+      i.afa = b / nd; jahr2NeuAfa += i.afa; jahr2NeuBrutto += b;
+    });
+    
+    const nichtAktiv = (inv2.nicht_aktivierungsplichtig || []).reduce(function(s, i) { return s + parseVal(i.betrag_brutto); }, 0);
+    
+    const gesamtAfa = bestehendeAfa + jahr1NeuAfa + jahr2NeuAfa;
+    
+    return {
+      bestehendeJahr2, bestehendeAfa, bestehendeRest,
+      jahr1NeuJahr2, jahr1NeuAfa, jahr1NeuRest,
+      jahr2NeuAfa, jahr2NeuBrutto,
+      nichtAktiv,
+      gesamtAfa
+    };
+  }
+
+  function calcBetrieblicheKostenJahr2() {
+    const kat = data.betriebliche_kosten_jahr2.kategorien;
+    const result = { monatlich: {}, jaehrlich: {}, gesamtMonatlich: 0, gesamtJaehrlich: 0, monatsArray: Array(12).fill(0) };
+    for (let k in kat) {
+      let km = 0, kj = 0; const monate = Array(12).fill(0);
+      kat[k].eintraege.forEach(function(e) {
+        const b = parseVal(e.betrag); const zw = e.zahlweise || 'monatlich'; const sm = (e.startmonat || 1) - 1;
+        const faktor = zahlweiseFaktor(zw); const jbetrag = b * faktor; const mbetrag = jbetrag / 12;
+        km += mbetrag; kj += jbetrag;
+        if (zw === 'monatlich') { for (let m = sm; m < 12; m++) monate[m] += b; }
+        else if (zw === 'zweimonatlich') { for (let m = sm; m < 12; m += 2) monate[m] += b; }
+        else if (zw === 'quartalsweise') { for (let m = sm; m < 12; m += 3) monate[m] += b; }
+        else if (zw === 'halbjaehrlich') { for (let m = sm; m < 12; m += 6) monate[m] += b; }
+        else if (zw === 'jaerlich') { monate[sm] += b; }
+      });
+      result.monatlich[k] = km; result.jaehrlich[k] = kj;
+      result.gesamtMonatlich += km; result.gesamtJaehrlich += kj;
+      for (let m = 0; m < 12; m++) result.monatsArray[m] += monate[m];
+    }
+    return result;
+  }
+
+  function calcUmsatzJahr2() {
+    const angebote = data.umsatz_jahr2.angebote;
+    const result = { angebote: [], gesamtBrutto: 0, gesamtNetto: 0, gesamtMwst: 0, gesamtRessource: 0, gesamtDeckung: 0, monatsArray: Array(12).fill(0) };
+    angebote.forEach(function(a, idx) {
+      const preis = parseVal(a.einzelpreis_brutto); const mwst = parseVal(a.mwst_satz) / 100; const resPct = parseVal(a.ressourceneinsatz_pct) / 100;
+      let brutto = 0, netto = 0, mwstSum = 0, resSum = 0; const monate = Array(12).fill(0);
+      a.verkaufszahlen.forEach(function(vz, m) {
+        const v = parseVal(vz); const mBrutto = v * preis; const mNetto = mBrutto / (1 + mwst); const mMwst = mBrutto - mNetto; const mRes = mNetto * resPct;
+        brutto += mBrutto; netto += mNetto; mwstSum += mMwst; resSum += mRes; monate[m] = mBrutto;
+      });
+      const deckung = netto - resSum;
+      result.angebote.push({ brutto, netto, mwst: mwstSum, ressource: resSum, deckung, monate });
+      result.gesamtBrutto += brutto; result.gesamtNetto += netto; result.gesamtMwst += mwstSum;
+      result.gesamtRessource += resSum; result.gesamtDeckung += deckung;
+      for (let m = 0; m < 12; m++) result.monatsArray[m] += monate[m];
+    });
+    return result;
+  }
+
+  function calcGewinnJahr2() {
+    const umsatz = calcUmsatzJahr2(); 
+    const kosten = calcBetrieblicheKostenJahr2(); 
+    const invest = calcInvestitionenJahr2();
+    const mindest = calcMindesteinkommen();
+    
+    const betriebsergebnis = umsatz.gesamtDeckung - kosten.gesamtJaehrlich - invest.gesamtAfa - invest.nichtAktiv;
+    const rechtsform = data.stammdaten.rechtsform || 'Einzelunternehmen';
+    const kanton = data.stammdaten.kanton || 'ZH';
+    const personengesellschaften = ['Einzelunternehmen', 'Kollektivgesellschaft', 'Kommanditgesellschaft'];
+    const isPersonengesellschaft = personengesellschaften.indexOf(rechtsform) !== -1;
+    
+    let ahvIvEo = 0, est = 0, steuerTyp = '', steuerLabel = '';
+    if (isPersonengesellschaft) {
+      ahvIvEo = Math.max(0, betriebsergebnis) * (data.steuern_ch.ahv_iv_eo_total / 100);
+      const estBmg = Math.max(0, betriebsergebnis - ahvIvEo);
+      est = calcEinkommenssteuer(estBmg);
+      steuerTyp = 'einkommenssteuer';
+      steuerLabel = 'Einkommenssteuer (vereinfacht)';
+    } else {
+      ahvIvEo = 0;
+      const kantonsMap = data.steuern_ch.gewinnsteuer_kantone || {};
+      const gewinnsteuerSatz = (kantonsMap[kanton] || 15) / 100;
+      est = Math.max(0, betriebsergebnis) * gewinnsteuerSatz;
+      steuerTyp = 'gewinnsteuer';
+      steuerLabel = App.t('profit_tax_corp') + ' (' + kanton + ', ca. ' + (kantonsMap[kanton] || 15) + '%)';
+    }
+    const netto = betriebsergebnis - ahvIvEo - est;
+    return { umsatz, kosten, invest, mindest, afa: invest.gesamtAfa, nichtAktiv: invest.nichtAktiv, deckung: umsatz.gesamtDeckung, betriebsergebnis, ahvIvEo, est, netto, steuerTyp, steuerLabel, isPersonengesellschaft, rechtsform, kanton };
+  }
+
+  function calcLiquiditaetJahr2() {
+    const umsatz = calcUmsatzJahr2(); 
+    const kosten = calcBetrieblicheKostenJahr2(); 
+    const invest = calcInvestitionenJahr2();
+    const gewinn = calcGewinnJahr2();
+    const liq1 = calcLiquiditaet();
+    
+    const liq = data.liquiditaet_jahr2;
+    const start = parseVal(liq.startguthaben) || liq1.endkum;
+    const einlage = parseVal(liq.privateinlage);
+    const fremd = parseVal(liq.fremdkapital);
+    const foerd = parseVal(liq.foerderungen);
+    
+    const einzahlungen = Array(12).fill(0);
+    const auszahlungen = Array(12).fill(0);
+    const saldo = Array(12).fill(0);
+    const kumuliert = Array(12).fill(0);
+    
+    for (let m = 0; m < 12; m++) einzahlungen[m] += umsatz.monatsArray[m];
+    einzahlungen[0] += einlage + fremd + foerd;
+    
+    for (let m = 0; m < 12; m++) auszahlungen[m] += kosten.monatsArray[m];
+    auszahlungen[0] += invest.jahr2NeuBrutto + invest.nichtAktiv;
+    
+    const ahvQ = gewinn.ahvIvEo / 4;
+    for (let m = 2; m < 12; m += 3) auszahlungen[m] += ahvQ;
+    auszahlungen[11] += gewinn.est;
+    
+    for (let m = 0; m < 12; m++) auszahlungen[m] += gewinn.mindest.monatlich;
+    
+    let kum = start;
+    for (let m = 0; m < 12; m++) {
+      saldo[m] = einzahlungen[m] - auszahlungen[m];
+      kum += saldo[m];
+      kumuliert[m] = kum;
+    }
+    
+    return { einzahlungen, auszahlungen, saldo, kumuliert, start, einlage, fremd, foerd,
+      gesamtEin: einzahlungen.reduce(function(a,b){return a+b;},0),
+      gesamtAus: auszahlungen.reduce(function(a,b){return a+b;},0), endkum: kum };
+  }
+
   function exportJSON() {
     try {
       if (!data) { alert(t('no_data')); return; }
@@ -684,6 +888,7 @@ const App = (function() {
     calcPrivateAusgaben: calcPrivateAusgaben, calcPrivateEinnahmen: calcPrivateEinnahmen, calcMindesteinkommen: calcMindesteinkommen,
     calcInvestitionen: calcInvestitionen, calcBetrieblicheKosten: calcBetrieblicheKosten, calcUmsatz: calcUmsatz,
     calcGewinn: calcGewinn, calcLiquiditaet: calcLiquiditaet, calcStundensatz: calcStundensatz, calcEinkommenssteuer: calcEinkommenssteuer, calcProduktkalkulation: calcProduktkalkulation,
+    calcInvestitionenJahr2: calcInvestitionenJahr2, calcBetrieblicheKostenJahr2: calcBetrieblicheKostenJahr2, calcUmsatzJahr2: calcUmsatzJahr2, calcGewinnJahr2: calcGewinnJahr2, calcLiquiditaetJahr2: calcLiquiditaetJahr2,
     exportJSON: exportJSON, importJSON: importJSON, exportPDF: exportPDF, showStatus: showStatus,
     fmt: fmt, fmtInt: fmtInt, parseVal: parseVal, monatlicherBetrag: monatlicherBetrag, zahlweiseFaktor: zahlweiseFaktor,
     setNavActive: setNavActive, t: t, setLanguage: setLanguage, getLanguage: getLanguage, applyLanguage: applyLanguage

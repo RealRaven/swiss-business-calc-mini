@@ -617,7 +617,7 @@ td input[type="number"] { text-align: right; }
 }
 
 /* Optional: small emoji icon before each label */
-.nav-apps-dropdown a[data-i18n="nav_overview"]::before   { content: "🏠"; font-size: 1.3rem; }
+.nav-apps-dropdown a[data-i18n="nav_overview"]::before   { content: "🏢"; font-size: 1.3rem; }
 .nav-apps-dropdown a[data-i18n="nav_master"]::before     { content: "📝"; font-size: 1.3rem; }
 .nav-apps-dropdown a[data-i18n="nav_private"]::before    { content: "🏠"; font-size: 1.3rem; }
 .nav-apps-dropdown a[data-i18n="nav_invest"]::before     { content: "💼"; font-size: 1.3rem; }
@@ -625,8 +625,16 @@ td input[type="number"] { text-align: right; }
 .nav-apps-dropdown a[data-i18n="nav_revenue"]::before    { content: "📈"; font-size: 1.3rem; }
 .nav-apps-dropdown a[data-i18n="nav_profit"]::before     { content: "💰"; font-size: 1.3rem; }
 .nav-apps-dropdown a[data-i18n="nav_liquidity"]::before  { content: "💧"; font-size: 1.3rem; }
+.nav-apps-dropdown a[data-i18n="nav_invest_jahr2"]::before     { content: "💼"; font-size: 1.3rem; }
+.nav-apps-dropdown a[data-i18n="nav_costs_jahr2"]::before      { content: "💸"; font-size: 1.3rem; }
+.nav-apps-dropdown a[data-i18n="nav_revenue_jahr2"]::before    { content: "📈"; font-size: 1.3rem; }
+.nav-apps-dropdown a[data-i18n="nav_profit_jahr2"]::before     { content: "💰"; font-size: 1.3rem; }
+.nav-apps-dropdown a[data-i18n="nav_liquidity_jahr2"]::before  { content: "💧"; font-size: 1.3rem; }
 .nav-apps-dropdown a[data-i18n="nav_hourly"]::before     { content: "⏱️"; font-size: 1.3rem; }
 .nav-apps-dropdown a[data-i18n="nav_productcalc"]::before     { content: "📦"; font-size: 1.3rem; }
+
+
+
 
 /* Mobile: let the dropdown span full width on very small screens */
 @media (max-width: 400px) {

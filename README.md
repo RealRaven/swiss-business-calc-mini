@@ -28,6 +28,7 @@ The entire application supports **German, English, French and Italian** – incl
 
 ## ✨ Features
 
+### Year 1 – Foundation
 - **📊 Dashboard** – Live overview of revenue, operating costs, net profit and year-end liquidity
 - **🏢 Master Data** – Company details, legal form, canton, VAT rates
 - **🏠 Private Budget** – Private expenses & income to calculate minimum required income
@@ -38,6 +39,20 @@ The entire application supports **German, English, French and Italian** – incl
 - **💧 Liquidity** – Monthly cash-flow forecast with cumulative balance
 - **⏱️ Hourly Rate** – Minimum, full-cost and target hourly rate incl. VAT
 - **📦 Product Calculation** – Cost price, selling price and contribution margin per product
+
+### Year 2 – Growth & Continuation
+- **📊 Dashboard Year 2** – Live overview with Year 1 carry-forward (liquidity end-balance → start balance)
+- **🖥️ Investments Year 2** – Four distinct blocks:
+  - Existing investments (residual value from Year 1 with correct AfA carry-forward)
+  - Year 1 planned investments (AfA continues into Year 2)
+  - Year 2 new planned investments (gross)
+  - One-time non-capitalized purchases (immediate expense)
+- **📋 Operating Costs Year 2** – Independent 20-category cost planning for the second year
+- **💰 Revenue Planning Year 2** – Separate offer classes and monthly sales curves
+- **📈 Profit & Taxes Year 2** – Full P&L including non-capitalized purchases as operating expense
+- **💧 Liquidity Year 2** – Cash-flow forecast with automatic Year 1 end-balance as starting point
+
+### General
 - **💾 Data Portability** – Export / Import your data as JSON
 - **📄 PDF Export** – Generate printable PDFs of any page (via html2canvas + jsPDF)
 - **🔒 Privacy First** – All data is stored **locally in your browser** (localStorage); no server, no tracking
@@ -72,34 +87,40 @@ Enable GitHub Pages in your repository settings and point it to the root folder 
 
 ```
 swiss-business-calc-mini/
-├── index.html                  # Dashboard / Overview
+├── index.html                  # Dashboard / Overview (Year 1 & Year 2 live summaries)
 ├── docs
 │   └──screenshot.png
 ├── pages
 │   ├── masterdata.html         # Company master data
 │   ├── private.html            # Private budget & minimum income
-│   ├── investments.html        # Investments & depreciation (AfA)
-│   ├── costs.html              # Operating costs (20 categories)
-│   ├── revenue.html            # Revenue planning
-│   ├── profit.html             # Profit & tax calculation
-│   ├── liquidity.html          # Liquidity forecast
+│   ├── investments.html        # Investments & depreciation (AfA) Year 1
+│   ├── investments_year2.html  # Investments Year 2 (4 blocks: existing Y1, AfA Y1→Y2, new Y2, non-capitalized)
+│   ├── costs.html              # Operating costs (20 categories) Year 1
+│   ├── costs_year2.html        # Operating costs Year 2
+│   ├── revenue.html            # Revenue planning Year 1
+│   ├── revenue_year2.html      # Revenue planning Year 2
+│   ├── profit.html             # Profit & tax calculation Year 1
+│   ├── profit_year2.html       # Profit & tax calculation Year 2
+│   ├── liquidity.html          # Liquidity forecast Year 1
+│   ├── liquidity_year2.html    # Liquidity forecast Year 2
 │   ├── hourlyrate.html         # Hourly rate calculator
 │   └── productcalc.html        # Product calculation
 ├── src
 │   ├── css/
 │   │   └── style.css           # Stylesheet
 │   └── js/
-│       ├── app.js              # Core business logic & calculations       
-│       └── i18n.js             # i18n: translations (DE/EN/FR/IT)   
+│       ├── app.js              # Core business logic & calculations (Year 1 + Year 2)
+│       └── i18n.js             # i18n: translations (DE/EN/FR/IT)
 ├── data.json                   # Default data template
 ├── .gitignore
-└── README.md                   
+└── README.md
 ```
 
 ### Architecture
 - **Single-page feel, multi-page setup** – Each module is a separate HTML file for clean separation, sharing `i18n.js`, `app.js` and `style.css`
 - **Modular i18n** – `i18n.js` is completely decoupled from business logic; `app.js` only calls `Lang.t(key)`
 - **Zero backend** – 100% client-side; data persists via `localStorage`
+- **Year 2 continuity** – Year 1 closing figures (liquidity end-balance, residual book values) automatically feed into Year 2 calculations
 
 ---
 
@@ -120,13 +141,17 @@ swiss-business-calc-mini/
 
 1. **Start with Master Data** – Enter your company details and check the VAT settings
 2. **Fill Private Budget** – This determines your minimum required income, which flows into all other calculations
-3. **Plan Investments** – Existing assets, planned purchases and one-time start-up costs
-4. **Enter Operating Costs** – Add all monthly/quarterly/yearly fixed costs; the tool distributes them automatically
-5. **Define Revenue** – Set up your offers, prices and expected monthly sales
-6. **Check Profit** – See immediately if your plan works financially
-7. **Monitor Liquidity** – Ensure you won't run out of cash in any month
+3. **Plan Investments Year 1** – Existing assets, planned purchases and one-time start-up costs
+4. **Enter Operating Costs Year 1** – Add all monthly/quarterly/yearly fixed costs; the tool distributes them automatically
+5. **Define Revenue Year 1** – Set up your offers, prices and expected monthly sales
+6. **Check Profit Year 1** – See immediately if your plan works financially
+7. **Monitor Liquidity Year 1** – Ensure you won't run out of cash in any month
 8. **Calculate Hourly Rate** – Know exactly what you need to charge per hour
 9. **Run Product Calculation** – Calculate cost prices, selling prices and contribution margins per product
+10. **Plan Year 2** – Navigate to Year 2 modules:
+    - **Investments Year 2** automatically carries forward Year 1 residual values and continues linear AfA. Add new Year 2 investments and one-time non-capitalized purchases separately.
+    - **Liquidity Year 2** defaults the start balance to Year 1's year-end liquidity.
+    - All other Year 2 modules work independently, allowing you to model growth or changed cost structures.
 
 ### Data Backup
 Use the **Export** button on the dashboard to save your data as a JSON file. You can re-import it later or on another device.
@@ -151,6 +176,7 @@ Contributions are welcome! Whether it's:
 - Adding new canton-specific tax rates
 - UI/UX enhancements
 - Bug fixes
+- Extending to Year 3+ planning
 
 Please open an issue or pull request.
 

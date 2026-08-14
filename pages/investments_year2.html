@@ -2,7 +2,7 @@
 <html lang="de">
 <head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="invest_title">Investitionen – Business Kalkulation CH</title>
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="invest_jahr2_title">Investitionen Jahr 2 – Business Kalkulation CH</title>
 </head>
 <body>
 <nav class="navbar">
@@ -48,7 +48,7 @@
 </nav>
 <div class="container">
   <div class="page-header">
-    <h1 data-i18n="invest_heading">Investitionen Jahr 1</h1>
+    <h1 data-i18n="invest_jahr2_heading">Investitionen Jahr 2</h1>
     <p data-i18n="invest_desc">Anlagegüter über CHF 1'000 werden abgeschrieben. Geringwertige Wirtschaftsgüter werden direkt als Aufwand erfasst.</p>
   </div>
 
@@ -57,25 +57,42 @@
   </div>
 
   <div class="card">
-    <div class="card-header" data-i18n="invest_existing">Bereits getätigte Investitionen (Restwert)</div>
+    <div class="card-header" data-i18n="invest_jahr2_existing_y1">Bereits getätigte Investitionen (Restwert) vom Jahr 1</div>
     <div class="card-body">
       <div class="table-wrap">
-        <table id="tbl-bestehend"><thead><tr>
+        <table id="tbl-bestehend-j2"><thead><tr>
           <th data-i18n="invest_col_desc">Bezeichnung</th>
           <th data-i18n="invest_col_residual_value">Restwert CHF</th>
           <th data-i18n="invest_col_nd_years">ND (Jahre)</th>
           <th data-i18n="invest_col_afa_year">AfA / Jahr</th>
+          <th data-i18n="invest_jahr2_col_remaining">Restbuchwert Jahr 2</th>
+          <th data-i18n="invest_jahr2_col_afa_y2">AfA Jahr 2</th>
         </tr></thead><tbody></tbody></table>
       </div>
-      <button class="btn btn-outline btn-sm mt-1" onclick="addRow('bestehend')" data-i18n="invest_btn_add_row">+ Zeile hinzufügen</button>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-header" data-i18n="invest_new">Geplante Investitionen (Brutto)</div>
+    <div class="card-header" data-i18n="invest_jahr2_afa_y1">AfA Investitionen Jahr 1</div>
     <div class="card-body">
       <div class="table-wrap">
-        <table id="tbl-neu"><thead><tr>
+        <table id="tbl-jahr1-neu-j2"><thead><tr>
+          <th data-i18n="invest_col_desc">Bezeichnung</th>
+          <th data-i18n="invest_col_amount_gross">Betrag brutto CHF</th>
+          <th data-i18n="invest_col_nd_years">ND (Jahre)</th>
+          <th data-i18n="invest_col_afa_year">AfA / Jahr</th>
+          <th data-i18n="invest_jahr2_col_remaining">Restbuchwert Jahr 2</th>
+          <th data-i18n="invest_jahr2_col_afa_y2">AfA Jahr 2</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="invest_jahr2_new_y2">Geplante Investitionen Jahr 2 (Brutto)</div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table id="tbl-neu-j2"><thead><tr>
           <th data-i18n="invest_col_desc">Bezeichnung</th>
           <th data-i18n="invest_col_amount_gross">Betrag brutto CHF</th>
           <th data-i18n="invest_col_nd_years">ND (Jahre)</th>
@@ -87,28 +104,27 @@
   </div>
 
   <div class="card">
-    <div class="card-header" data-i18n="invest_startup">Einmalige Gründungskosten</div>
+    <div class="card-header" data-i18n="invest_jahr2_non_capitalized">Einmalige nicht aktivierungsplichtige Anschaffungen</div>
     <div class="card-body">
       <div class="table-wrap">
-        <table id="tbl-gruendung"><thead><tr>
+        <table id="tbl-nicht-aktiv"><thead><tr>
           <th data-i18n="invest_col_desc">Bezeichnung</th>
-          <th data-i18n="invest_col_amount_net">Betrag netto CHF</th>
-          <th data-i18n="invest_col_vat_pct">MWST %</th>
           <th data-i18n="invest_col_amount_gross">Betrag brutto CHF</th>
         </tr></thead><tbody></tbody></table>
       </div>
-      <button class="btn btn-outline btn-sm mt-1" onclick="addRow('gruendung')" data-i18n="invest_btn_add_row">+ Zeile hinzufügen</button>
+      <button class="btn btn-outline btn-sm mt-1" onclick="addRow('nicht_aktivierungsplichtig')" data-i18n="invest_btn_add_row">+ Zeile hinzufügen</button>
     </div>
   </div>
 
   <div class="card">
     <div class="card-header" data-i18n="invest_summary">Zusammenfassung</div>
     <div class="card-body">
-      <div class="grid grid-4">
-        <div class="summary-box"><div class="label" data-i18n="invest_afa_existing">AfA bestehend</div><div class="value" id="inv-afa-alt">CHF 0.00</div></div>
-        <div class="summary-box"><div class="label" data-i18n="invest_afa_new">AfA neu</div><div class="value" id="inv-afa-neu">CHF 0.00</div></div>
-        <div class="summary-box"><div class="label" data-i18n="invest_afa_total">Gesamt-AfA / Jahr</div><div class="value" id="inv-afa-ges">CHF 0.00</div></div>
-        <div class="summary-box"><div class="label" data-i18n="invest_startup_costs">Gründungskosten brutto</div><div class="value" id="inv-gruen">CHF 0.00</div></div>
+      <div class="grid grid-5">
+        <div class="summary-box"><div class="label" data-i18n="invest_jahr2_afa_existing_y2">AfA bestehend Jahr 2</div><div class="value" id="inv2-afa-alt">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="invest_jahr2_afa_y1_y2">AfA Investitionen Jahr 1 (Jahr 2)</div><div class="value" id="inv2-afa-j1">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="invest_jahr2_afa_new_y2">AfA neu Jahr 2</div><div class="value" id="inv2-afa-neu">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="invest_afa_total">Gesamt-AfA / Jahr</div><div class="value" id="inv2-afa-ges">CHF 0.00</div></div>
+        <div class="summary-box warning"><div class="label" data-i18n="invest_jahr2_non_capitalized_total">Nicht aktivierungsplichtig</div><div class="value" id="inv2-nicht">CHF 0.00</div></div>
       </div>
     </div>
   </div>
@@ -117,70 +133,85 @@
 <script src="../src/js/app.js"></script>
 <script>
 function render() {
-  const d = App.getData().investitionen;
-  const tbodyAlt = document.querySelector('#tbl-bestehend tbody');
+  const c = App.calcInvestitionenJahr2();
+  
+  const tbodyAlt = document.querySelector('#tbl-bestehend-j2 tbody');
   tbodyAlt.innerHTML = '';
-  d.bestehende.forEach((row, i) => {
+  c.bestehendeJahr2.forEach(function(row) {
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td><input class="form-control" value="' + row.bezeichnung + '" data-type="bestehend" data-idx="' + i + '" data-f="bezeichnung"></td>' +
-      '<td><input type="number" class="form-control" value="' + row.restwert + '" data-type="bestehend" data-idx="' + i + '" data-f="restwert"></td>' +
-      '<td><input type="number" class="form-control" value="' + row.nd + '" data-type="bestehend" data-idx="' + i + '" data-f="nd"></td>' +
-      '<td class="num">' + App.fmt(row.restwert / (row.nd || 1)) + '</td>';
+    tr.innerHTML = '<td>' + row.bezeichnung + '</td>' +
+      '<td class="num">' + App.fmt(row.restwertJahr1) + '</td>' +
+      '<td class="num">' + row.nd + '</td>' +
+      '<td class="num">' + App.fmt(row.afaJahr1) + '</td>' +
+      '<td class="num">' + App.fmt(row.restwertJahr2) + '</td>' +
+      '<td class="num">' + App.fmt(row.afaJahr2) + '</td>';
     tbodyAlt.appendChild(tr);
   });
-  const tbodyNeu = document.querySelector('#tbl-neu tbody');
-  tbodyNeu.innerHTML = '';
-  d.neu.forEach((row, i) => {
+  
+  const tbodyJ1 = document.querySelector('#tbl-jahr1-neu-j2 tbody');
+  tbodyJ1.innerHTML = '';
+  c.jahr1NeuJahr2.forEach(function(row) {
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td><input class="form-control" value="' + row.bezeichnung + '" data-type="neu" data-idx="' + i + '" data-f="bezeichnung"></td>' +
+    tr.innerHTML = '<td>' + row.bezeichnung + '</td>' +
+      '<td class="num">' + App.fmt(row.betragJahr1) + '</td>' +
+      '<td class="num">' + row.nd + '</td>' +
+      '<td class="num">' + App.fmt(row.afaJahr1) + '</td>' +
+      '<td class="num">' + App.fmt(row.restwertJahr2) + '</td>' +
+      '<td class="num">' + App.fmt(row.afaJahr2) + '</td>';
+    tbodyJ1.appendChild(tr);
+  });
+  
+  const d = App.getData().investitionen_jahr2;
+  const tbodyNeu = document.querySelector('#tbl-neu-j2 tbody');
+  tbodyNeu.innerHTML = '';
+  d.neu.forEach(function(row, i) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><input class="form-control" value="' + (row.bezeichnung||'') + '" data-type="neu" data-idx="' + i + '" data-f="bezeichnung"></td>' +
       '<td><input type="number" class="form-control" value="' + row.betrag_brutto + '" data-type="neu" data-idx="' + i + '" data-f="betrag_brutto"></td>' +
       '<td><input type="number" class="form-control" value="' + row.nd + '" data-type="neu" data-idx="' + i + '" data-f="nd"></td>' +
       '<td class="num">' + App.fmt(row.betrag_brutto / (row.nd || 1)) + '</td>';
     tbodyNeu.appendChild(tr);
   });
-  const tbodyG = document.querySelector('#tbl-gruendung tbody');
-  tbodyG.innerHTML = '';
-  d.gruendungskosten.forEach((row, i) => {
-    const brutto = row.betrag_netto * (1 + row.mwst/100);
+  
+  const tbodyNicht = document.querySelector('#tbl-nicht-aktiv tbody');
+  tbodyNicht.innerHTML = '';
+  d.nicht_aktivierungsplichtig.forEach(function(row, i) {
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td><input class="form-control" value="' + row.bezeichnung + '" data-type="gruendung" data-idx="' + i + '" data-f="bezeichnung"></td>' +
-      '<td><input type="number" class="form-control" value="' + row.betrag_netto + '" data-type="gruendung" data-idx="' + i + '" data-f="betrag_netto"></td>' +
-      '<td><input type="number" class="form-control" value="' + row.mwst + '" data-type="gruendung" data-idx="' + i + '" data-f="mwst"></td>' +
-      '<td class="num">' + App.fmt(brutto) + '</td>';
-    tbodyG.appendChild(tr);
+    tr.innerHTML = '<td><input class="form-control" value="' + (row.bezeichnung||'') + '" data-type="nicht_aktivierungsplichtig" data-idx="' + i + '" data-f="bezeichnung"></td>' +
+      '<td><input type="number" class="form-control" value="' + row.betrag_brutto + '" data-type="nicht_aktivierungsplichtig" data-idx="' + i + '" data-f="betrag_brutto"></td>';
+    tbodyNicht.appendChild(tr);
   });
+  
   bindInputs();
   updateSummary();
 }
 
 function bindInputs() {
-  document.querySelectorAll('input[data-type]').forEach(el => {
-    el.onchange = () => {
-      const d = App.getData().investitionen;
+  document.querySelectorAll('input[data-type]').forEach(function(el) {
+    el.onchange = function() {
+      const d = App.getData().investitionen_jahr2;
       const type = el.dataset.type, idx = parseInt(el.dataset.idx), f = el.dataset.f;
       let val = el.type === 'number' ? App.parseVal(el.value) : el.value;
-      if (type === 'bestehend') d.bestehende[idx][f] = val;
-      else if (type === 'neu') d.neu[idx][f] = val;
-      else if (type === 'gruendung') d.gruendungskosten[idx][f] = val;
+      d[type][idx][f] = val;
       App.save(); render();
     };
   });
 }
 
 function addRow(type) {
-  const d = App.getData().investitionen;
-  if (type === 'bestehend') d.bestehende.push({bezeichnung:'', restwert:0, nd:3, afa:0});
-  else if (type === 'neu') d.neu.push({bezeichnung:'', betrag_brutto:0, nd:3, afa:0});
-  else if (type === 'gruendung') d.gruendungskosten.push({bezeichnung:'', betrag_netto:0, mwst:8.1});
+  const d = App.getData().investitionen_jahr2;
+  if (type === 'neu') d.neu.push({bezeichnung:'', betrag_brutto:0, nd:3, afa:0});
+  else if (type === 'nicht_aktivierungsplichtig') d.nicht_aktivierungsplichtig.push({bezeichnung:'', betrag_brutto:0});
   App.save(); render();
 }
 
 function updateSummary() {
-  const c = App.calcInvestitionen();
-  document.getElementById('inv-afa-alt').textContent = 'CHF ' + App.fmt(c.bestehendeAfa);
-  document.getElementById('inv-afa-neu').textContent = 'CHF ' + App.fmt(c.neueAfa);
-  document.getElementById('inv-afa-ges').textContent = 'CHF ' + App.fmt(c.gesamtAfa);
-  document.getElementById('inv-gruen').textContent = 'CHF ' + App.fmt(c.gruendung);
+  const c = App.calcInvestitionenJahr2();
+  document.getElementById('inv2-afa-alt').textContent = 'CHF ' + App.fmt(c.bestehendeAfa);
+  document.getElementById('inv2-afa-j1').textContent = 'CHF ' + App.fmt(c.jahr1NeuAfa);
+  document.getElementById('inv2-afa-neu').textContent = 'CHF ' + App.fmt(c.jahr2NeuAfa);
+  document.getElementById('inv2-afa-ges').textContent = 'CHF ' + App.fmt(c.gesamtAfa);
+  document.getElementById('inv2-nicht').textContent = 'CHF ' + App.fmt(c.nichtAktiv);
 }
 
 window.pageInit = render;

@@ -2,7 +2,7 @@
 <html lang="de">
 <head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="revenue_title">Umsatz – Business Kalkulation CH</title>
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="revenue_jahr2_title">Umsatz Jahr 2</title>
 </head>
 <body>
 <nav class="navbar">
@@ -48,7 +48,7 @@
 </nav>
 <div class="container">
   <div class="page-header">
-    <h1 data-i18n="revenue_heading">Umsatzplanung Jahr 1</h1>
+    <h1 data-i18n="revenue_heading">Umsatzplanung Jahr 2</h1>
     <p data-i18n="revenue_desc">Bis zu 4 Angebotsklassen mit monatlichem Verlauf, Preisen, MWST-Satz und variablem Ressourceneinsatz.</p>
   </div>
 
@@ -85,7 +85,7 @@ const mwstOptionen = [
 function buildUmsatz() {
   const container = document.getElementById('angebote-container');
   container.innerHTML = '';
-  const d = App.getData().umsatz_jahr1.angebote;
+  const d = App.getData().umsatz_jahr2.angebote;
   d.forEach((a, idx) => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -109,7 +109,7 @@ function buildUmsatz() {
 function bindUmsatz() {
   document.querySelectorAll('input[data-idx], select[data-idx]').forEach(el => {
     el.onchange = () => {
-      const d = App.getData().umsatz_jahr1.angebote[el.dataset.idx];
+      const d = App.getData().umsatz_jahr2.angebote[el.dataset.idx];
       if (el.dataset.f === 'name') d.name = el.value;
       else if (el.dataset.f) {
         let v = el.type === 'number' || el.tagName === 'SELECT' ? App.parseVal(el.value) : el.value;
@@ -123,7 +123,7 @@ function bindUmsatz() {
 }
 
 function updateSummary() {
-  const u = App.calcUmsatz();
+  const u = App.calcUmsatzJahr2();
   document.getElementById('u-brutto').textContent = 'CHF ' + App.fmt(u.gesamtBrutto);
   document.getElementById('u-mwst').textContent = 'CHF ' + App.fmt(u.gesamtMwst);
   document.getElementById('u-netto').textContent = 'CHF ' + App.fmt(u.gesamtNetto);
