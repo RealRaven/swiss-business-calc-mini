@@ -126,6 +126,12 @@
           <input type="number" class="form-control" id="inhaber-lohn" value="0">
         </div>
       </div>
+      <div class="info-box mt-1" id="hint-person" style="display:none;font-size:0.85rem;padding:0.6rem 0.9rem;">
+        <span data-i18n="private_hint_person">Bei Personengesellschaften ist dies Ihre private Entnahme. Sie wird nicht als Betriebskosten erfasst, aber in der Liquiditätsplanung berücksichtigt.</span>
+      </div>
+      <div class="info-box mt-1" id="hint-corp" style="display:none;font-size:0.85rem;padding:0.6rem 0.9rem;">
+        <span data-i18n="private_hint_corp">Bei Kapitalgesellschaften (GmbH, AG etc.) muss der Geschäftsführerlohn unter Betriebskosten → Personal erfasst werden. Dieser Wert dient nur Ihrer privaten Planung.</span>
+      </div>
     </div>
   </div>
 
@@ -233,6 +239,9 @@ function updateEntnahmeLabel() {
   document.getElementById('title-salary').style.display = isPerson ? 'none' : '';
   document.getElementById('label-withdrawal').style.display = isPerson ? '' : 'none';
   document.getElementById('label-salary').style.display = isPerson ? 'none' : '';
+  
+  document.getElementById('hint-person').style.display = isPerson ? 'block' : 'none';
+  document.getElementById('hint-corp').style.display = isPerson ? 'none' : 'block';
 }
 
 function updateSummary() {
@@ -264,7 +273,6 @@ function initPage() {
   });
   buildAusgaben(); buildEinnahmen(); updateSummary();
 
-  // Standalone owner-salary input (Private Entnahme)
   const lohnEl = document.getElementById('inhaber-lohn');
   lohnEl.value = App.getData().private_einnahmen.monatlicher_lohn_inhaber || 0;
   lohnEl.addEventListener('change', () => {

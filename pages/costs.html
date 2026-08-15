@@ -2,7 +2,7 @@
 <html lang="de">
 <head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="costs_title">Operating Costs – Business Calculation CH</title>
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="costs_title">Operating Costs Year 1</title>
 </head>
 <body>
 <nav class="navbar">
@@ -165,7 +165,23 @@ function updateSummary() {
   document.getElementById('kost-sum-m').textContent = 'CHF ' + App.fmt(c.gesamtMonatlich);
   document.getElementById('kost-sum-j').textContent = 'CHF ' + App.fmt(c.gesamtJaehrlich);
 }
-window.pageInit = buildKosten;
+
+function showCorpHint() {
+  const rf = App.getData().stammdaten.rechtsform || 'Einzelunternehmen';
+  const isCorp = ['GmbH','AG','Genossenschaft','Verein'].indexOf(rf) !== -1;
+  if (!isCorp) return;
+  const box = document.createElement('div');
+  box.className = 'info-box';
+  box.style.cssText = 'margin-bottom:1rem;border-left-color:var(--warning);';
+  box.innerHTML = '<strong>Kapitalgesellschaft (' + rf + '):</strong> Ihr eigener Geschäftsführerlohn (Brutto inkl. Arbeitgeber-Sozialabgaben) gehört in die Kategorie <em>1. Personal</em>. Erfassen Sie ihn nicht im Privatbudget als Betriebskosten.';
+  const container = document.getElementById('kosten-container');
+  container.parentNode.insertBefore(box, container);
+}
+
+window.pageInit = function() {
+  buildKosten();
+  showCorpHint();
+};
 </script>
 </body>
 </html>

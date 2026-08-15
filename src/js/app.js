@@ -271,7 +271,6 @@ const App = (function() {
     const einnahmen = calcPrivateEinnahmen();
     const diff = Math.max(0, ausgaben.monatlich - einnahmen);
 
-    // Year 1: prorate based on founding month; Year 2: full 12 months
     let monateAktiv = 12;
     if (jahr === 1) {
       const gm = parseVal(data.stammdaten.gruendungsmonat) || 1;
@@ -279,7 +278,6 @@ const App = (function() {
     }
 
     const jahresDiff = diff * monateAktiv;
-    // Monatlicher Lohn Inhaber is entered as NETTO
     const lohnInhaber = parseVal(data.private_einnahmen.monatlicher_lohn_inhaber) || 0;
     const lohnJaehrlich = lohnInhaber * monateAktiv;
     const lohnMonatlich = lohnInhaber;
@@ -315,17 +313,17 @@ const App = (function() {
     const kat = data.betriebliche_kosten_jahr1.kategorien;
     const result = { monatlich: {}, jaehrlich: {}, gesamtMonatlich: 0, gesamtJaehrlich: 0, monatsArray: Array(12).fill(0) };
     for (let k in kat) {
-      let km = 0, kj = 0; const monate = Array(12).fill(0);
+      const monate = Array(12).fill(0);
       kat[k].eintraege.forEach(function(e) {
-                const b = parseVal(e.betrag); const zw = e.zahlweise || 'monatlich'; const sm = (e.startmonat || 1) - 1;
-        const faktor = zahlweiseFaktor(zw); const jbetrag = b * faktor; const mbetrag = jbetrag / 12;
-        km += mbetrag; kj += jbetrag;
+        const b = parseVal(e.betrag); const zw = e.zahlweise || 'monatlich'; const sm = (e.startmonat || 1) - 1;
         if (zw === 'monatlich') { for (let m = sm; m < 12; m++) monate[m] += b; }
         else if (zw === 'zweimonatlich') { for (let m = sm; m < 12; m += 2) monate[m] += b; }
         else if (zw === 'quartalsweise') { for (let m = sm; m < 12; m += 3) monate[m] += b; }
         else if (zw === 'halbjaehrlich') { for (let m = sm; m < 12; m += 6) monate[m] += b; }
-        else if (zw === 'jaerlich') { monate[sm] += b; }
+        else if (zw === 'jaerlich') { if (sm < 12) monate[sm] += b; }
       });
+      const kj = monate.reduce(function(a, b) { return a + b; }, 0);
+      const km = kj / 12;
       result.monatlich[k] = km; result.jaehrlich[k] = kj;
       result.gesamtMonatlich += km; result.gesamtJaehrlich += kj;
       for (let m = 0; m < 12; m++) result.monatsArray[m] += monate[m];
@@ -380,9 +378,7 @@ const App = (function() {
       steuerTyp = 'einkommenssteuer';
       steuerLabel = 'Einkommenssteuer (vereinfacht)';
     } else {
-      // Kapitalgesellschaft / Verein / Genossenschaft: keine AHV auf Gewinn, Gewinnsteuer statt ESt.
       ahvIvEo = 0;
-      const kanton = data.stammdaten.kanton || 'ZH';
       const kantonsMap = data.steuern_ch.gewinnsteuer_kantone || {};
       const gewinnsteuerSatz = (kantonsMap[kanton] || 15) / 100;
       est = Math.max(0, betriebsergebnis) * gewinnsteuerSatz;
@@ -399,38 +395,34 @@ const App = (function() {
     const start = parseVal(liq.startguthaben); const einlage = parseVal(liq.privateinlage);
     const fremd = parseVal(liq.fremdkapital); const foerd = parseVal(liq.foerderungen);
 
-    // Gründungsmonat aus Stammdaten (1–12)
     const gm = parseVal(data.stammdaten.gruendungsmonat) || 1;
-    const startIdx = gm - 1; // 0-basierter Index
+    const startIdx = gm - 1;
 
     const einzahlungen = Array(12).fill(0); const auszahlungen = Array(12).fill(0);
     const saldo = Array(12).fill(0); const kumuliert = Array(12).fill(0);
 
-    // Umsatz erst ab Gründungsmonat
     for (let m = startIdx; m < 12; m++) einzahlungen[m] += umsatz.monatsArray[m];
 
-    // Startkapital & Zuflüsse erst im Gründungsmonat
     einzahlungen[startIdx] += start + einlage + fremd + foerd;
 
-    // Betriebskosten erst ab Gründungsmonat
     for (let m = startIdx; m < 12; m++) auszahlungen[m] += kosten.monatsArray[m];
 
-    // Investitionen & Gründungskosten erst im Gründungsmonat
     auszahlungen[startIdx] += invest.neueBrutto + invest.gruendung;
 
-    // AHV-Vierteljahreszahlungen (März, Juni, Sept, Dez) erst ab Gründung
     const ahvQ = gewinn.ahvIvEo / 4;
     for (let m = 2; m < 12; m += 3) {
       if (m >= startIdx) auszahlungen[m] += ahvQ;
     }
 
-    // Steuerzahlung erst am Jahresende, falls nach Gründung
     if (11 >= startIdx) auszahlungen[11] += gewinn.est;
 
-    // Lohn an Inhaber erst ab Gründungsmonat
-    for (let m = startIdx; m < 12; m++) auszahlungen[m] += gewinn.mindest.lohnMonatlich;
+    // Private Entnahme / GF-Lohn
+    // Personengesellschaft: Privatentnahme ist keine Betriebskosten, aber Liquiditätsauszahlung
+    // Kapitalgesellschaft: GF-Lohn ist bereits in Betriebskosten enthalten
+    if (gewinn.isPersonengesellschaft) {
+      for (let m = startIdx; m < 12; m++) auszahlungen[m] += gewinn.mindest.lohnMonatlich;
+    }
 
-    // Kumulation: vor Gründungsmonat = 0, ab Gründungsmonat aufsummieren
     let kum = 0;
     for (let m = 0; m < 12; m++) {
       if (m < startIdx) {
@@ -462,7 +454,7 @@ const App = (function() {
       const mwstSatz = parseVal(p.mwst_satz) / 100;
       const mwst = netto * mwstSatz;
       const brutto = netto + mwst;
-      const deckung = netto - mat - lohn; // = gewinn + gk
+      const deckung = netto - mat - lohn;
       const menge = parseVal(p.menge_jahr);
       result.produkte.push({
         bezeichnung: p.bezeichnung, materialkosten: mat, lohnkosten: lohn, fertigungskosten: fertigung,
@@ -551,17 +543,17 @@ const App = (function() {
     const kat = data.betriebliche_kosten_jahr2.kategorien;
     const result = { monatlich: {}, jaehrlich: {}, gesamtMonatlich: 0, gesamtJaehrlich: 0, monatsArray: Array(12).fill(0) };
     for (let k in kat) {
-      let km = 0, kj = 0; const monate = Array(12).fill(0);
+      const monate = Array(12).fill(0);
       kat[k].eintraege.forEach(function(e) {
         const b = parseVal(e.betrag); const zw = e.zahlweise || 'monatlich'; const sm = (e.startmonat || 1) - 1;
-        const faktor = zahlweiseFaktor(zw); const jbetrag = b * faktor; const mbetrag = jbetrag / 12;
-        km += mbetrag; kj += jbetrag;
         if (zw === 'monatlich') { for (let m = sm; m < 12; m++) monate[m] += b; }
         else if (zw === 'zweimonatlich') { for (let m = sm; m < 12; m += 2) monate[m] += b; }
         else if (zw === 'quartalsweise') { for (let m = sm; m < 12; m += 3) monate[m] += b; }
         else if (zw === 'halbjaehrlich') { for (let m = sm; m < 12; m += 6) monate[m] += b; }
-        else if (zw === 'jaerlich') { monate[sm] += b; }
+        else if (zw === 'jaerlich') { if (sm < 12) monate[sm] += b; }
       });
+      const kj = monate.reduce(function(a, b) { return a + b; }, 0);
+      const km = kj / 12;
       result.monatlich[k] = km; result.jaehrlich[k] = kj;
       result.gesamtMonatlich += km; result.gesamtJaehrlich += kj;
       for (let m = 0; m < 12; m++) result.monatsArray[m] += monate[m];
@@ -647,7 +639,12 @@ const App = (function() {
     for (let m = 2; m < 12; m += 3) auszahlungen[m] += ahvQ;
     auszahlungen[11] += gewinn.est;
     
-    for (let m = 0; m < 12; m++) auszahlungen[m] += gewinn.mindest.lohnMonatlich;
+    // Private Entnahme / GF-Lohn
+    // Personengesellschaft: Privatentnahme ist keine Betriebskosten, aber Liquiditätsauszahlung
+    // Kapitalgesellschaft: GF-Lohn ist bereits in Betriebskosten enthalten
+    if (gewinn.isPersonengesellschaft) {
+      for (let m = 0; m < 12; m++) auszahlungen[m] += gewinn.mindest.lohnMonatlich;
+    }
     
     let kum = start;
     for (let m = 0; m < 12; m++) {
@@ -733,7 +730,6 @@ const App = (function() {
   function setNavActive() {
     const page = location.pathname.split('/').pop() || 'index.html';
 
-    /* Highlight active item in the apps dropdown */
     const dropdown = document.getElementById('nav-apps-dropdown');
     if (dropdown) {
       dropdown.querySelectorAll('a').forEach(function(a) {
@@ -742,7 +738,6 @@ const App = (function() {
     }
   }
 
-  /* Toggle the apps dropdown */
   document.addEventListener('DOMContentLoaded', function() {
     const toggle = document.getElementById('nav-apps-toggle');
     const dropdown = document.getElementById('nav-apps-dropdown');
@@ -755,7 +750,6 @@ const App = (function() {
       toggle.setAttribute('aria-expanded', isOpen);
     });
 
-    /* Close when clicking outside */
     document.addEventListener('click', function(e) {
       if (!dropdown.contains(e.target) && e.target !== toggle) {
         dropdown.classList.remove('open');
@@ -764,7 +758,6 @@ const App = (function() {
       }
     });
 
-    /* Close on Escape key */
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && dropdown.classList.contains('open')) {
         dropdown.classList.remove('open');
@@ -795,16 +788,13 @@ const App = (function() {
         return;
       }
 
-      // Build a clean printable wrapper in the DOM (off-screen but rendered)
       const pdfWrapper = document.createElement('div');
       pdfWrapper.id = 'pdf-export-wrapper';
       pdfWrapper.style.cssText = 'position:absolute;left:-9999px;top:0;width:210mm;background:#fff;z-index:-1;visibility:hidden;';
       document.body.appendChild(pdfWrapper);
 
-      // Clone container content
       const cloneContainer = originalContainer.cloneNode(true);
 
-      // Replace inputs with spans for print
       cloneContainer.querySelectorAll('input, select, textarea').forEach(function(el) {
         const span = document.createElement('span');
         span.textContent = el.value || el.textContent || '';
@@ -812,12 +802,10 @@ const App = (function() {
         if (el.parentNode) el.parentNode.replaceChild(span, el);
       });
 
-      // Hide buttons
       cloneContainer.querySelectorAll('button, .btn, .lang-switcher, #btn-pdf').forEach(function(el) {
         el.style.display = 'none';
       });
 
-      // Build pages
       const cards = Array.from(cloneContainer.querySelectorAll('.card'));
       const PAGE_H_MM = 270;
       const MM_TO_PX = 3.7795;
@@ -846,13 +834,11 @@ const App = (function() {
 
       for (let i = 0; i < cards.length; i++) {
         const card = cards[i];
-        // Temporarily append to measure
         curPage.content.appendChild(card);
         const hPx = card.offsetHeight || card.scrollHeight || 200;
         const hMm = hPx / MM_TO_PX;
 
         if (curPage.currentH + hMm > PAGE_H_MM && curPage.content.children.length > 2) {
-          // Doesn't fit – move to new page
           card.remove();
           curPage = makePage();
           curPage.content.appendChild(card);
@@ -862,7 +848,6 @@ const App = (function() {
         }
       }
 
-      // Remove empty pages
       const allPageEls = Array.from(pdfWrapper.children);
       const validPages = allPageEls.filter(function(p) {
         return p.querySelectorAll('.card').length > 0;
@@ -875,12 +860,10 @@ const App = (function() {
         return;
       }
 
-      // Render each page to canvas and add to PDF
       const pdf = new jsPDF('p', 'mm', 'a4');
 
       for (let i = 0; i < validPages.length; i++) {
         const pageEl = validPages[i];
-        // Make visible for rendering
         pageEl.style.visibility = 'visible';
         pageEl.style.position = 'static';
 
@@ -896,7 +879,6 @@ const App = (function() {
         pageEl.style.visibility = 'hidden';
         pageEl.style.position = 'absolute';
 
-        // Use JPEG for smaller file size
         const imgData = canvas.toDataURL('image/jpeg', 0.92);
         const imgWidth = 210;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -953,16 +935,13 @@ const App = (function() {
   };
 })();
 
-// Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', function() {
   App.init();
   App.setNavActive();
   App.applyLanguage();
 
-  /* Language dropdown binding */
   const langSelect = document.getElementById('lang-select');
   if (langSelect) {
-    // set initial value
     langSelect.value = App.getLanguage();
 
     langSelect.addEventListener('change', function () {

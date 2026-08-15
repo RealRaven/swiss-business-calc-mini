@@ -388,6 +388,8 @@ const Lang = (function() {
       private_withdrawal_title: 'Private Entnahme (Netto)',
       private_salary_title: 'Geschäftsführerlohn (Netto)',
       private_salary_label: 'Netto-Gehalt Geschäftsführer',
+      private_hint_person: 'Bei Personengesellschaften ist dies Ihre private Entnahme. Sie wird nicht als Betriebskosten erfasst, aber in der Liquiditätsplanung berücksichtigt.',
+      private_hint_corp: 'Bei Kapitalgesellschaften (GmbH, AG etc.) muss der Geschäftsführerlohn unter Betriebskosten → Personal erfasst werden. Dieser Wert dient nur Ihrer privaten Planung.',
     },
     en: {
       brand: 'Business Calculation Switzerland',
@@ -770,6 +772,8 @@ const Lang = (function() {
       private_withdrawal_title: 'Private Withdrawal (Net)',
       private_salary_title: 'Managing Director Salary (Net)',
       private_salary_label: 'Net Salary (Managing Director)',
+      private_hint_person: 'For sole proprietorships and partnerships, this is your private withdrawal. It is not recorded as an operating cost, but is considered in liquidity planning.',
+      private_hint_corp: 'For corporations (GmbH, AG etc.), the managing director salary must be recorded under Operating Costs → Personnel. This value is for your private planning only.',
     },
     fr: {
       brand: "Calcul d'entreprise Suisse",
@@ -1152,6 +1156,8 @@ const Lang = (function() {
       private_withdrawal_title: 'Prélèvement privé (net)',
       private_salary_title: 'Salaire de gérant (net)',
       private_salary_label: 'Salaire net (gérant)',
+      private_hint_person: 'Pour les entreprises individuelles et sociétés de personnes, il s\'agit de votre prélèvement privé. Il n\'est pas comptabilisé en charges, mais pris en compte dans la planification de liquidité.',
+      private_hint_corp: 'Pour les sociétés de capitaux (Sàrl, SA etc.), le salaire de gérant doit être enregistré sous Coûts d\'exploitation → Personnel. Cette valeur sert uniquement à votre planification privée.',
     },
     it: {
       brand: "Calcolo d'impresa Svizzera",
@@ -1534,6 +1540,8 @@ const Lang = (function() {
       private_withdrawal_title: 'Prelievo privato (netto)',
       private_salary_title: 'Stipendio amministratore (netto)',
       private_salary_label: 'Stipendio netto (amministratore)',
+      private_hint_person: 'Per ditte individuali e società di persone, questo è il vostro prelievo privato. Non è registrato come costo operativo, ma è considerato nella pianificazione della liquidità.',
+      private_hint_corp: 'Per società di capitali (GmbH, SA ecc.), lo stipendio dell\'amministratore deve essere registrato sotto Costi operativi → Personale. Questo valore serve solo alla vostra pianificazione privata.',
     }
   };
 
