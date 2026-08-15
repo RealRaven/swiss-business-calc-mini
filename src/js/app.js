@@ -34,7 +34,8 @@ const App = (function() {
     private_einnahmen: {
       nettogehalt_partner: 0, unterhalt: 0, alimente_einnahmen: 0,
       kinderzulage: 0, mieteinnahmen: 0, kapitalertraege: 0,
-      familienunterstuetzung: 0, nebenjob: 0, sonstiges: 0
+      familienunterstuetzung: 0, nebenjob: 0, sonstiges: 0,
+      monatlicher_lohn_inhaber: 0
     },
     investitionen: {
       bestehende: [
@@ -259,15 +260,40 @@ const App = (function() {
 
   function calcPrivateEinnahmen() {
     let sum = 0;
-    for (let k in data.private_einnahmen) sum += parseVal(data.private_einnahmen[k]);
+    for (let k in data.private_einnahmen) {
+      if (k !== 'monatlicher_lohn_inhaber') sum += parseVal(data.private_einnahmen[k]);
+    }
     return sum;
   }
 
-  function calcMindesteinkommen() {
+  function calcMindesteinkommen(jahr) {
     const ausgaben = calcPrivateAusgaben();
     const einnahmen = calcPrivateEinnahmen();
     const diff = Math.max(0, ausgaben.monatlich - einnahmen);
-    return { monatlich: diff, jaehrlich: diff * 12, ausgaben, einnahmen };
+
+    // Year 1: prorate based on founding month; Year 2: full 12 months
+    let monateAktiv = 12;
+    if (jahr === 1) {
+      const gm = parseVal(data.stammdaten.gruendungsmonat) || 1;
+      monateAktiv = 13 - gm;
+    }
+
+    const jahresDiff = diff * monateAktiv;
+    // Monatlicher Lohn Inhaber is entered as NETTO
+    const lohnInhaber = parseVal(data.private_einnahmen.monatlicher_lohn_inhaber) || 0;
+    const lohnJaehrlich = lohnInhaber * monateAktiv;
+    const lohnMonatlich = lohnInhaber;
+
+    return { 
+      monatlich: diff, 
+      jaehrlich: jahresDiff, 
+      ausgaben, 
+      einnahmen,
+      monateAktiv,
+      lohnInhaber,
+      lohnJaehrlich,
+      lohnMonatlich
+    };
   }
 
   function calcInvestitionen() {
@@ -340,7 +366,7 @@ const App = (function() {
 
   function calcGewinn() {
     const umsatz = calcUmsatz(); const kosten = calcBetrieblicheKosten(); const invest = calcInvestitionen();
-    const mindest = calcMindesteinkommen(); const afa = invest.gesamtAfa; const deckung = umsatz.gesamtDeckung;
+    const mindest = calcMindesteinkommen(1); const afa = invest.gesamtAfa; const deckung = umsatz.gesamtDeckung;
     const betriebsergebnis = deckung - kosten.gesamtJaehrlich - afa;
     const rechtsform = data.stammdaten.rechtsform || 'Einzelunternehmen';
     const kanton = data.stammdaten.kanton || 'ZH';
@@ -372,20 +398,51 @@ const App = (function() {
     const liq = data.liquiditaet; const gewinn = calcGewinn();
     const start = parseVal(liq.startguthaben); const einlage = parseVal(liq.privateinlage);
     const fremd = parseVal(liq.fremdkapital); const foerd = parseVal(liq.foerderungen);
+
+    // Gründungsmonat aus Stammdaten (1–12)
+    const gm = parseVal(data.stammdaten.gruendungsmonat) || 1;
+    const startIdx = gm - 1; // 0-basierter Index
+
     const einzahlungen = Array(12).fill(0); const auszahlungen = Array(12).fill(0);
     const saldo = Array(12).fill(0); const kumuliert = Array(12).fill(0);
-    for (let m = 0; m < 12; m++) einzahlungen[m] += umsatz.monatsArray[m];
-    einzahlungen[0] += einlage + fremd + foerd;
-    for (let m = 0; m < 12; m++) auszahlungen[m] += kosten.monatsArray[m];
-    auszahlungen[0] += invest.neueBrutto + invest.gruendung;
+
+    // Umsatz erst ab Gründungsmonat
+    for (let m = startIdx; m < 12; m++) einzahlungen[m] += umsatz.monatsArray[m];
+
+    // Startkapital & Zuflüsse erst im Gründungsmonat
+    einzahlungen[startIdx] += start + einlage + fremd + foerd;
+
+    // Betriebskosten erst ab Gründungsmonat
+    for (let m = startIdx; m < 12; m++) auszahlungen[m] += kosten.monatsArray[m];
+
+    // Investitionen & Gründungskosten erst im Gründungsmonat
+    auszahlungen[startIdx] += invest.neueBrutto + invest.gruendung;
+
+    // AHV-Vierteljahreszahlungen (März, Juni, Sept, Dez) erst ab Gründung
     const ahvQ = gewinn.ahvIvEo / 4;
-    for (let m = 2; m < 12; m += 3) auszahlungen[m] += ahvQ;
-    auszahlungen[11] += gewinn.est;
-    for (let m = 0; m < 12; m++) auszahlungen[m] += gewinn.mindest.monatlich;
-    let kum = start;
-    for (let m = 0; m < 12; m++) {
-      saldo[m] = einzahlungen[m] - auszahlungen[m]; kum += saldo[m]; kumuliert[m] = kum;
+    for (let m = 2; m < 12; m += 3) {
+      if (m >= startIdx) auszahlungen[m] += ahvQ;
     }
+
+    // Steuerzahlung erst am Jahresende, falls nach Gründung
+    if (11 >= startIdx) auszahlungen[11] += gewinn.est;
+
+    // Lohn an Inhaber erst ab Gründungsmonat
+    for (let m = startIdx; m < 12; m++) auszahlungen[m] += gewinn.mindest.lohnMonatlich;
+
+    // Kumulation: vor Gründungsmonat = 0, ab Gründungsmonat aufsummieren
+    let kum = 0;
+    for (let m = 0; m < 12; m++) {
+      if (m < startIdx) {
+        saldo[m] = 0;
+        kumuliert[m] = 0;
+      } else {
+        saldo[m] = einzahlungen[m] - auszahlungen[m];
+        kum += saldo[m];
+        kumuliert[m] = kum;
+      }
+    }
+
     return { einzahlungen, auszahlungen, saldo, kumuliert, start, einlage, fremd, foerd,
       gesamtEin: einzahlungen.reduce(function(a,b){return a+b;},0),
       gesamtAus: auszahlungen.reduce(function(a,b){return a+b;},0), endkum: kum };
@@ -430,15 +487,16 @@ const App = (function() {
 
   function calcStundensatz() {
     const s = data.stundensatz; const gewinn = calcGewinn();
+    const mindest = calcMindesteinkommen(1);
     const wochen = 52 - parseVal(s.urlaub_wochen) - parseVal(s.krankheit_wochen) - parseVal(s.feiertage_wochen);
     const gesamtStd = parseVal(s.gesamtarbeitszeit_woche) * wochen;
     const nichtVerrechenbar = parseVal(s.nicht_verrechenbar_std_woche) * wochen;
     const verrechenbar = (gesamtStd - nichtVerrechenbar) * parseVal(s.auslastungsgrad);
     const vollkosten = gewinn.kosten.gesamtJaehrlich + gewinn.umsatz.gesamtRessource + gewinn.ahvIvEo + gewinn.est;
-    const mindest = vollkosten + gewinn.mindest.jaehrlich;
+    const mindestLohn = vollkosten + mindest.lohnJaehrlich;
     const ziel = vollkosten + parseVal(s.zielgewinn_jahr);
     const basisVoll = verrechenbar > 0 ? vollkosten / verrechenbar : 0;
-    const basisMin = verrechenbar > 0 ? mindest / verrechenbar : 0;
+    const basisMin = verrechenbar > 0 ? mindestLohn / verrechenbar : 0;
     const basisZiel = verrechenbar > 0 ? ziel / verrechenbar : 0;
     const mwst = data.stammdaten.mwst_satz_normal / 100;
     return { wochen, gesamtStd, nichtVerrechenbar, verrechenbar, basisVoll, basisMin, basisZiel, mwst };
@@ -534,7 +592,7 @@ const App = (function() {
     const umsatz = calcUmsatzJahr2(); 
     const kosten = calcBetrieblicheKostenJahr2(); 
     const invest = calcInvestitionenJahr2();
-    const mindest = calcMindesteinkommen();
+    const mindest = calcMindesteinkommen(2);
     
     const betriebsergebnis = umsatz.gesamtDeckung - kosten.gesamtJaehrlich - invest.gesamtAfa - invest.nichtAktiv;
     const rechtsform = data.stammdaten.rechtsform || 'Einzelunternehmen';
@@ -589,7 +647,7 @@ const App = (function() {
     for (let m = 2; m < 12; m += 3) auszahlungen[m] += ahvQ;
     auszahlungen[11] += gewinn.est;
     
-    for (let m = 0; m < 12; m++) auszahlungen[m] += gewinn.mindest.monatlich;
+    for (let m = 0; m < 12; m++) auszahlungen[m] += gewinn.mindest.lohnMonatlich;
     
     let kum = start;
     for (let m = 0; m < 12; m++) {

@@ -48,7 +48,7 @@
 </nav>
 <div class="container">
   <div class="page-header">
-    <h1 data-i18n="liquidity_heading">Liquidität Jahr 2</h1>
+    <h1 data-i18n="liquidity_jahr2_title">Liquidität Jahr 2</h1>
     <p data-i18n="liquidity_desc">Zahlungsfähigkeit im Jahresverlauf – erkennen Sie finanzielle Engpässe frühzeitig.</p>
   </div>
 
@@ -103,7 +103,7 @@ function initPage() {
   // Default Startguthaben = Jahresende Liquidität Jahr 1, falls nicht explizit gesetzt
   const defaultStart = d.startguthaben || l1.endkum;
   
-  document.getElementById('liq-start').value = defaultStart;
+  document.getElementById('liq-start').value = Number(defaultStart).toFixed(2);
   document.getElementById('liq-einlage').value = d.privateinlage;
   document.getElementById('liq-fremd').value = d.fremdkapital;
   document.getElementById('liq-foerd').value = d.foerderungen;

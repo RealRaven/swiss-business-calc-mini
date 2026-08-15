@@ -112,13 +112,36 @@
   </div>
 
   <div class="card">
+    <div class="card-header">
+      <span data-i18n="private_withdrawal_title" id="title-withdrawal">Private Entnahme (Netto)</span>
+      <span data-i18n="private_salary_title" id="title-salary" style="display:none">Geschäftsführerlohn (Netto)</span>
+    </div>
+    <div class="card-body">
+      <div class="grid grid-3">
+        <div class="form-group">
+          <label>
+            <span data-i18n="private_income_owner_salary" id="label-withdrawal">Monatlicher Lohn Inhaber</span>
+            <span data-i18n="private_salary_label" id="label-salary" style="display:none">Netto-Gehalt Geschäftsführer</span>
+          </label>
+          <input type="number" class="form-control" id="inhaber-lohn" value="0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-header" data-i18n="private_budget_summary">Haushaltsbudget Zusammenfassung</div>
     <div class="card-body">
       <div class="grid grid-4">
         <div class="summary-box"><div class="label" data-i18n="private_expenses_month">Private Ausgaben / Monat</div><div class="value" id="sum-ausgaben">CHF 0.00</div></div>
         <div class="summary-box"><div class="label" data-i18n="private_income_month">Private Einnahmen / Monat</div><div class="value" id="sum-einnahmen">CHF 0.00</div></div>
         <div class="summary-box warning"><div class="label" data-i18n="private_min_income_month">Mindesteinkommen / Monat</div><div class="value" id="sum-mindest-m">CHF 0.00</div></div>
-        <div class="summary-box warning"><div class="label" data-i18n="private_min_income_year">Mindesteinkommen / Jahr</div><div class="value" id="sum-mindest-j">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="private_income_owner_salary">Monatlicher Lohn Inhaber</div><div class="value" id="sum-lohn">CHF 0.00</div></div>
+      </div>
+      <div class="grid grid-3 mt-1">
+        <div class="summary-box warning"><div class="label" data-i18n="private_min_income_year">Mindesteinkommen / Jahr 1</div><div class="value" id="sum-mindest-j">CHF 0.00</div></div>
+        <div class="summary-box warning"><div class="label" data-i18n="private_min_income_year2">Mindesteinkommen / Jahr 2</div><div class="value" id="sum-mindest-j2">CHF 0.00</div></div>
+        <div class="summary-box" id="sum-deck-box"><div class="label" data-i18n="private_cost_coverage">Kostendeckung</div><div class="value" id="sum-deck">-</div></div>
       </div>
     </div>
   </div>
@@ -201,12 +224,36 @@ function buildEinnahmen() {
   });
 }
 
+function updateEntnahmeLabel() {
+  const rf = App.getData().stammdaten.rechtsform || 'Einzelunternehmen';
+  const personenGesellschaften = ['Einzelunternehmen', 'Kollektivgesellschaft', 'Kommanditgesellschaft'];
+  const isPerson = personenGesellschaften.indexOf(rf) !== -1;
+
+  document.getElementById('title-withdrawal').style.display = isPerson ? '' : 'none';
+  document.getElementById('title-salary').style.display = isPerson ? 'none' : '';
+  document.getElementById('label-withdrawal').style.display = isPerson ? '' : 'none';
+  document.getElementById('label-salary').style.display = isPerson ? 'none' : '';
+}
+
 function updateSummary() {
-  const m = App.calcMindesteinkommen();
-  document.getElementById('sum-ausgaben').textContent = 'CHF ' + App.fmt(m.ausgaben.monatlich);
-  document.getElementById('sum-einnahmen').textContent = 'CHF ' + App.fmt(m.einnahmen);
-  document.getElementById('sum-mindest-m').textContent = 'CHF ' + App.fmt(m.monatlich);
-  document.getElementById('sum-mindest-j').textContent = 'CHF ' + App.fmt(m.jaehrlich);
+  const m1 = App.calcMindesteinkommen(1);
+  const m2 = App.calcMindesteinkommen(2);
+  document.getElementById('sum-ausgaben').textContent = 'CHF ' + App.fmt(m1.ausgaben.monatlich);
+  document.getElementById('sum-einnahmen').textContent = 'CHF ' + App.fmt(m1.einnahmen);
+  document.getElementById('sum-mindest-m').textContent = 'CHF ' + App.fmt(m1.monatlich);
+  document.getElementById('sum-lohn').textContent = 'CHF ' + App.fmt(m1.lohnMonatlich);
+  document.getElementById('sum-mindest-j').textContent = 'CHF ' + App.fmt(m1.jaehrlich);
+  document.getElementById('sum-mindest-j2').textContent = 'CHF ' + App.fmt(m2.jaehrlich);
+  const deckBox = document.getElementById('sum-deck-box');
+  const deckEl = document.getElementById('sum-deck');
+  const totalIncome = m1.lohnMonatlich + m1.einnahmen;
+  if (totalIncome >= m1.ausgaben.monatlich) {
+    deckBox.className = 'summary-box success';
+    deckEl.textContent = App.t('private_costs_covered');
+  } else {
+    deckBox.className = 'summary-box danger';
+    deckEl.textContent = App.t('private_costs_not_covered');
+  }
 }
 
 function initPage() {
@@ -216,6 +263,15 @@ function initPage() {
     App.save();
   });
   buildAusgaben(); buildEinnahmen(); updateSummary();
+
+  // Standalone owner-salary input (Private Entnahme)
+  const lohnEl = document.getElementById('inhaber-lohn');
+  lohnEl.value = App.getData().private_einnahmen.monatlicher_lohn_inhaber || 0;
+  lohnEl.addEventListener('change', () => {
+    App.getData().private_einnahmen.monatlicher_lohn_inhaber = App.parseVal(lohnEl.value);
+    App.save(); updateSummary();
+  });
+  updateEntnahmeLabel();
 }
 window.pageInit = initPage;
 </script>
