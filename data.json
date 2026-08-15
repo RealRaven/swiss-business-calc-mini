@@ -220,7 +220,8 @@
     "kapitalertraege": 0,
     "familienunterstuetzung": 0,
     "nebenjob": 0,
-    "sonstiges": 0
+    "sonstiges": 0,
+    "monatlicher_lohn_inhaber": 0
   },
   "investitionen": {
     "bestehende": [

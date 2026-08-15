@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="invest_title">Investitionen – Business Kalkulation CH</title>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">📊 <span data-i18n="brand">Business Kalkulation <span>Schweiz</span></span></div>
+    <div class="nav-apps">
+      <button class="nav-apps-toggle" id="nav-apps-toggle" aria-label="Menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+      <div class="nav-apps-dropdown" id="nav-apps-dropdown">
+        <a href="../index.html" data-i18n="nav_overview">Overview</a>
+        <a href="masterdata.html" data-i18n="nav_master">Master Data</a>
+        <a href="private.html" data-i18n="nav_private">Private Budget</a>
+        <a href="investments.html" data-i18n="nav_invest">Investments J1</a>
+        <a href="costs.html" data-i18n="nav_costs">Operating Costs J1</a>
+        <a href="revenue.html" data-i18n="nav_revenue">Revenue J1</a>
+        <a href="profit.html" data-i18n="nav_profit">Profit J1</a>
+        <a href="liquidity.html" data-i18n="nav_liquidity">Liquidity J1</a>
+        <a href="investments_year2.html" data-i18n="nav_invest_jahr2">Investments J2</a>
+        <a href="costs_year2.html" data-i18n="nav_costs_jahr2">Operating Costs J2</a>
+        <a href="revenue_year2.html" data-i18n="nav_revenue_jahr2">Revenue J2</a>
+        <a href="profit_year2.html" data-i18n="nav_profit_jahr2">Profit J2</a>
+        <a href="liquidity_year2.html" data-i18n="nav_liquidity_jahr2">Liquidity J2</a>
+        <a href="hourlyrate.html" data-i18n="nav_hourly">Hourly Rate</a>
+        <a href="productcalc.html" data-i18n="nav_productcalc">Product Calculation</a>
+      </div>
+    </div>
+    <div class="lang-switcher">
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+    <button class="btn btn-sm" id="btn-pdf" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);white-space:nowrap;" onclick="App.exportPDF()" data-i18n="pdf">PDF</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-header">
+    <h1 data-i18n="invest_heading">Investitionen Jahr 1</h1>
+    <p data-i18n="invest_desc">Anlagegüter über CHF 1'000 werden abgeschrieben. Geringwertige Wirtschaftsgüter werden direkt als Aufwand erfasst.</p>
+  </div>
+
+  <div class="info-box">
+    <span data-i18n="invest_info_afa">Abschreibung (AfA): Einmalige Investitionen über mehrere Jahre steuerlich geltend machen. Nutzungsdauer (ND) schätzen oder gesetzliche Richtwerte verwenden. EDV: 3 Jahre, Möbel: 8-10 Jahre, KFZ: 5-8 Jahre.</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="invest_existing">Bereits getätigte Investitionen (Restwert)</div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table id="tbl-bestehend"><thead><tr>
+          <th data-i18n="invest_col_desc">Bezeichnung</th>
+          <th data-i18n="invest_col_residual_value">Restwert CHF</th>
+          <th data-i18n="invest_col_nd_years">ND (Jahre)</th>
+          <th data-i18n="invest_col_afa_year">AfA / Jahr</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+      <button class="btn btn-outline btn-sm mt-1" onclick="addRow('bestehend')" data-i18n="invest_btn_add_row">+ Zeile hinzufügen</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="invest_new">Geplante Investitionen (Brutto)</div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table id="tbl-neu"><thead><tr>
+          <th data-i18n="invest_col_desc">Bezeichnung</th>
+          <th data-i18n="invest_col_amount_gross">Betrag brutto CHF</th>
+          <th data-i18n="invest_col_nd_years">ND (Jahre)</th>
+          <th data-i18n="invest_col_afa_year">AfA / Jahr</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+      <button class="btn btn-outline btn-sm mt-1" onclick="addRow('neu')" data-i18n="invest_btn_add_row">+ Zeile hinzufügen</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="invest_startup">Einmalige Gründungskosten</div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table id="tbl-gruendung"><thead><tr>
+          <th data-i18n="invest_col_desc">Bezeichnung</th>
+          <th data-i18n="invest_col_amount_net">Betrag netto CHF</th>
+          <th data-i18n="invest_col_vat_pct">MWST %</th>
+          <th data-i18n="invest_col_amount_gross">Betrag brutto CHF</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+      <button class="btn btn-outline btn-sm mt-1" onclick="addRow('gruendung')" data-i18n="invest_btn_add_row">+ Zeile hinzufügen</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="invest_summary">Zusammenfassung</div>
+    <div class="card-body">
+      <div class="grid grid-4">
+        <div class="summary-box"><div class="label" data-i18n="invest_afa_existing">AfA bestehend</div><div class="value" id="inv-afa-alt">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="invest_afa_new">AfA neu</div><div class="value" id="inv-afa-neu">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="invest_afa_total">Gesamt-AfA / Jahr</div><div class="value" id="inv-afa-ges">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="invest_startup_costs">Gründungskosten brutto</div><div class="value" id="inv-gruen">CHF 0.00</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../src/js/i18n.js"></script>
+<script src="../src/js/app.js"></script>
+<script>
+function render() {
+  const d = App.getData().investitionen;
+  const tbodyAlt = document.querySelector('#tbl-bestehend tbody');
+  tbodyAlt.innerHTML = '';
+  d.bestehende.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><input class="form-control" value="' + row.bezeichnung + '" data-type="bestehend" data-idx="' + i + '" data-f="bezeichnung"></td>' +
+      '<td><input type="number" class="form-control" value="' + row.restwert + '" data-type="bestehend" data-idx="' + i + '" data-f="restwert"></td>' +
+      '<td><input type="number" class="form-control" value="' + row.nd + '" data-type="bestehend" data-idx="' + i + '" data-f="nd"></td>' +
+      '<td class="num">' + App.fmt(row.restwert / (row.nd || 1)) + '</td>';
+    tbodyAlt.appendChild(tr);
+  });
+  const tbodyNeu = document.querySelector('#tbl-neu tbody');
+  tbodyNeu.innerHTML = '';
+  d.neu.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><input class="form-control" value="' + row.bezeichnung + '" data-type="neu" data-idx="' + i + '" data-f="bezeichnung"></td>' +
+      '<td><input type="number" class="form-control" value="' + row.betrag_brutto + '" data-type="neu" data-idx="' + i + '" data-f="betrag_brutto"></td>' +
+      '<td><input type="number" class="form-control" value="' + row.nd + '" data-type="neu" data-idx="' + i + '" data-f="nd"></td>' +
+      '<td class="num">' + App.fmt(row.betrag_brutto / (row.nd || 1)) + '</td>';
+    tbodyNeu.appendChild(tr);
+  });
+  const tbodyG = document.querySelector('#tbl-gruendung tbody');
+  tbodyG.innerHTML = '';
+  d.gruendungskosten.forEach((row, i) => {
+    const brutto = row.betrag_netto * (1 + row.mwst/100);
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><input class="form-control" value="' + row.bezeichnung + '" data-type="gruendung" data-idx="' + i + '" data-f="bezeichnung"></td>' +
+      '<td><input type="number" class="form-control" value="' + row.betrag_netto + '" data-type="gruendung" data-idx="' + i + '" data-f="betrag_netto"></td>' +
+      '<td><input type="number" class="form-control" value="' + row.mwst + '" data-type="gruendung" data-idx="' + i + '" data-f="mwst"></td>' +
+      '<td class="num">' + App.fmt(brutto) + '</td>';
+    tbodyG.appendChild(tr);
+  });
+  bindInputs();
+  updateSummary();
+}
+
+function bindInputs() {
+  document.querySelectorAll('input[data-type]').forEach(el => {
+    el.onchange = () => {
+      const d = App.getData().investitionen;
+      const type = el.dataset.type, idx = parseInt(el.dataset.idx), f = el.dataset.f;
+      let val = el.type === 'number' ? App.parseVal(el.value) : el.value;
+      if (type === 'bestehend') d.bestehende[idx][f] = val;
+      else if (type === 'neu') d.neu[idx][f] = val;
+      else if (type === 'gruendung') d.gruendungskosten[idx][f] = val;
+      App.save(); render();
+    };
+  });
+}
+
+function addRow(type) {
+  const d = App.getData().investitionen;
+  if (type === 'bestehend') d.bestehende.push({bezeichnung:'', restwert:0, nd:3, afa:0});
+  else if (type === 'neu') d.neu.push({bezeichnung:'', betrag_brutto:0, nd:3, afa:0});
+  else if (type === 'gruendung') d.gruendungskosten.push({bezeichnung:'', betrag_netto:0, mwst:8.1});
+  App.save(); render();
+}
+
+function updateSummary() {
+  const c = App.calcInvestitionen();
+  document.getElementById('inv-afa-alt').textContent = 'CHF ' + App.fmt(c.bestehendeAfa);
+  document.getElementById('inv-afa-neu').textContent = 'CHF ' + App.fmt(c.neueAfa);
+  document.getElementById('inv-afa-ges').textContent = 'CHF ' + App.fmt(c.gesamtAfa);
+  document.getElementById('inv-gruen').textContent = 'CHF ' + App.fmt(c.gruendung);
+}
+
+window.pageInit = render;
+</script>
+</body>
+</html>

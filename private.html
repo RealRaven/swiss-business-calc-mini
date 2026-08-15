@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="private_title">Privatbudget – Business Kalkulation CH</title>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">📊 <span data-i18n="brand">Business Kalkulation <span>Schweiz</span></span></div>
+    <div class="nav-apps">
+      <button class="nav-apps-toggle" id="nav-apps-toggle" aria-label="Menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+      <div class="nav-apps-dropdown" id="nav-apps-dropdown">
+        <a href="../index.html" data-i18n="nav_overview">Overview</a>
+        <a href="masterdata.html" data-i18n="nav_master">Master Data</a>
+        <a href="private.html" data-i18n="nav_private">Private Budget</a>
+        <a href="investments.html" data-i18n="nav_invest">Investments J1</a>
+        <a href="costs.html" data-i18n="nav_costs">Operating Costs J1</a>
+        <a href="revenue.html" data-i18n="nav_revenue">Revenue J1</a>
+        <a href="profit.html" data-i18n="nav_profit">Profit J1</a>
+        <a href="liquidity.html" data-i18n="nav_liquidity">Liquidity J1</a>
+        <a href="investments_year2.html" data-i18n="nav_invest_jahr2">Investments J2</a>
+        <a href="costs_year2.html" data-i18n="nav_costs_jahr2">Operating Costs J2</a>
+        <a href="revenue_year2.html" data-i18n="nav_revenue_jahr2">Revenue J2</a>
+        <a href="profit_year2.html" data-i18n="nav_profit_jahr2">Profit J2</a>
+        <a href="liquidity_year2.html" data-i18n="nav_liquidity_jahr2">Liquidity J2</a>
+        <a href="hourlyrate.html" data-i18n="nav_hourly">Hourly Rate</a>
+        <a href="productcalc.html" data-i18n="nav_productcalc">Product Calculation</a>
+      </div>
+    </div>
+    <div class="lang-switcher">
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+    <button class="btn btn-sm" id="btn-pdf" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);white-space:nowrap;" onclick="App.exportPDF()" data-i18n="pdf">PDF</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-header">
+    <h1 data-i18n="private_heading">Private Ausgaben & Budget</h1>
+    <p data-i18n="private_desc">Erfassen Sie Ihre privaten Kosten und Einnahmen, um das erforderliche Mindesteinkommen zu ermitteln.</p>
+  </div>
+
+  <div class="info-box" data-i18n="private_info">
+    Schätzen Sie Ihre privaten Kosten ab dem Zeitpunkt der Selbstständigkeit. 
+    Nicht vorhandene Kosten können Sie leer lassen. Die Zahlweise ist von monatlich bis jährlich wählbar.
+  </div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="private_household_type">Haushaltstyp</div>
+    <div class="card-body">
+      <div class="form-group">
+        <select class="form-control" id="ab-haushalt" style="max-width:400px">
+          <option value="gesamter_haushalt" data-i18n="private_household_whole">Gesamter Haushalt / Familie</option>
+          <option value="einzelperson" data-i18n="private_household_single">Nur mich selbst</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-header" data-i18n="private_cat_living">Lebenserhaltung</div>
+      <div class="card-body" id="cat-lebenserhaltung"></div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-i18n="private_cat_leisure">Freizeit & Urlaub</div>
+      <div class="card-body" id="cat-freizeit"></div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-i18n="private_cat_housing">Wohnen</div>
+      <div class="card-body" id="cat-wohnen"></div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-i18n="private_cat_communication">Kommunikation</div>
+      <div class="card-body" id="cat-kommunikation"></div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-i18n="private_cat_children">Kinder & Familie</div>
+      <div class="card-body" id="cat-kinder"></div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-i18n="private_cat_mobility">Mobilität</div>
+      <div class="card-body" id="cat-mobilitaet"></div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-i18n="private_cat_insurance">Versicherungen</div>
+      <div class="card-body" id="cat-versicherungen"></div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-i18n="private_cat_finance">Finanzen, Kredite, Sparen</div>
+      <div class="card-body" id="cat-finanzen"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="private_income_monthly">Private Einnahmen (monatlich)</div>
+    <div class="card-body">
+      <div class="grid grid-3" id="einnahmen-grid"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span data-i18n="private_withdrawal_title" id="title-withdrawal">Private Entnahme (Netto)</span>
+      <span data-i18n="private_salary_title" id="title-salary" style="display:none">Geschäftsführerlohn (Netto)</span>
+    </div>
+    <div class="card-body">
+      <div class="grid grid-3">
+        <div class="form-group">
+          <label>
+            <span data-i18n="private_income_owner_salary" id="label-withdrawal">Monatlicher Lohn Inhaber</span>
+            <span data-i18n="private_salary_label" id="label-salary" style="display:none">Netto-Gehalt Geschäftsführer</span>
+          </label>
+          <input type="number" class="form-control" id="inhaber-lohn" value="0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="private_budget_summary">Haushaltsbudget Zusammenfassung</div>
+    <div class="card-body">
+      <div class="grid grid-4">
+        <div class="summary-box"><div class="label" data-i18n="private_expenses_month">Private Ausgaben / Monat</div><div class="value" id="sum-ausgaben">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="private_income_month">Private Einnahmen / Monat</div><div class="value" id="sum-einnahmen">CHF 0.00</div></div>
+        <div class="summary-box warning"><div class="label" data-i18n="private_min_income_month">Mindesteinkommen / Monat</div><div class="value" id="sum-mindest-m">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="private_income_owner_salary">Monatlicher Lohn Inhaber</div><div class="value" id="sum-lohn">CHF 0.00</div></div>
+      </div>
+      <div class="grid grid-3 mt-1">
+        <div class="summary-box warning"><div class="label" data-i18n="private_min_income_year">Mindesteinkommen / Jahr 1</div><div class="value" id="sum-mindest-j">CHF 0.00</div></div>
+        <div class="summary-box warning"><div class="label" data-i18n="private_min_income_year2">Mindesteinkommen / Jahr 2</div><div class="value" id="sum-mindest-j2">CHF 0.00</div></div>
+        <div class="summary-box" id="sum-deck-box"><div class="label" data-i18n="private_cost_coverage">Kostendeckung</div><div class="value" id="sum-deck">-</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../src/js/i18n.js"></script>
+<script src="../src/js/app.js"></script>
+<script>
+const zahlweisen = [
+  {v:'monatlich',k:'monthly'},{v:'zweimonatlich',k:'bimonthly'},{v:'quartalsweise',k:'quarterly'},
+  {v:'halbjaehrlich',k:'halfyearly'},{v:'jaerlich',k:'yearly'}
+];
+const kategorien = {
+  lebenserhaltung: {items:['nahrungsmittel','kleidung','schuhe','haushaltsartikel','kosmetik','arzt_selbsthalt','sonstiges']},
+  freizeit: {items:['theater_kino','fitness','reisen','geschenke','ausbildung','abos']},
+  wohnen: {items:['miete','heizung','strom','wasser_muel','reinigung','moebel']},
+  kommunikation: {items:['festnetz','mobil','internet']},
+  kinder: {items:['kindergarten','schule','veranstaltungen','taschengeld']},
+  mobilitaet: {items:['versicherung_steuer','treibstoff','service','vignette','parken','oeffis']},
+  versicherungen: {items:['haushalt','krankenzusatz','leben','pension','rechtsschutz','unfall']},
+  finanzen: {items:['kredit','alimente','sparen','kontofuehrung']}
+};
+const itemLabels = {
+  nahrungsmittel:'private_item_nahrungsmittel', kleidung:'private_item_kleidung', schuhe:'private_item_schuhe', haushaltsartikel:'private_item_haushaltsartikel', kosmetik:'private_item_kosmetik', arzt_selbsthalt:'private_item_arzt_selbsthalt', sonstiges:'private_item_sonstiges',
+  theater_kino:'private_item_theater_kino', fitness:'private_item_fitness', reisen:'private_item_reisen', geschenke:'private_item_geschenke', ausbildung:'private_item_ausbildung', abos:'private_item_abos',
+  miete:'private_item_miete', heizung:'private_item_heizung', strom:'private_item_strom', wasser_muel:'private_item_wasser_muel', reinigung:'private_item_reinigung', moebel:'private_item_moebel',
+  festnetz:'private_item_festnetz', mobil:'private_item_mobil', internet:'private_item_internet',
+  kindergarten:'private_item_kindergarten', schule:'private_item_schule', veranstaltungen:'private_item_veranstaltungen', taschengeld:'private_item_taschengeld',
+  versicherung_steuer:'private_item_versicherung_steuer', treibstoff:'private_item_treibstoff', service:'private_item_service', vignette:'private_item_vignette', parken:'private_item_parken', oeffis:'private_item_oeffis',
+  haushalt:'private_item_haushalt', krankenzusatz:'private_item_krankenzusatz', leben:'private_item_leben', pension:'private_item_pension', rechtsschutz:'private_item_rechtsschutz', unfall:'private_item_unfall',
+  kredit:'private_item_kredit', alimente:'private_item_alimente', sparen:'private_item_sparen', kontofuehrung:'private_item_kontofuehrung'
+};
+const einnahmenMap = {
+  nettogehalt_partner:'private_income_nettogehalt_partner', unterhalt:'private_income_unterhalt', alimente_einnahmen:'private_income_alimente_einnahmen',
+  kinderzulage:'private_income_kinderzulage', mieteinnahmen:'private_income_mieteinnahmen', kapitalertraege:'private_income_kapitalertraege',
+  familienunterstuetzung:'private_income_familienunterstuetzung', nebenjob:'private_income_nebenjob', sonstiges:'private_income_sonstiges'
+};
+
+function buildAusgaben() {
+  const d = App.getData().private_ausgaben.kategorien;
+  for (let cat in kategorien) {
+    const container = document.getElementById('cat-' + cat);
+    if (!container) continue;
+    let html = '<table><thead><tr><th>' + App.t('private_col_item') + '</th><th>' + App.t('private_col_amount') + '</th><th>' + App.t('private_col_frequency') + '</th></tr></thead><tbody>';
+    kategorien[cat].items.forEach(key => {
+      const item = d[cat][key] || {betrag:0, zahlweise:'monatlich'};
+      html += '<tr><td>' + App.t(itemLabels[key]) + '</td><td><input type="number" class="form-control" data-cat="' + cat + '" data-item="' + key + '" data-field="betrag" value="' + item.betrag + '"></td><td><select class="form-control" data-cat="' + cat + '" data-item="' + key + '" data-field="zahlweise">' + zahlweisen.map(z => '<option value="' + z.v + '"' + (z.v===item.zahlweise?' selected':'') + '>' + App.t(z.k) + '</option>').join('') + '</select></td></tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+  document.querySelectorAll('#cat-lebenserhaltung input, #cat-freizeit input, #cat-wohnen input, #cat-kommunikation input, #cat-kinder input, #cat-mobilitaet input, #cat-versicherungen input, #cat-finanzen input').forEach(el => {
+    el.addEventListener('change', () => {
+      const cat = el.dataset.cat, item = el.dataset.item;
+      App.getData().private_ausgaben.kategorien[cat][item].betrag = App.parseVal(el.value);
+      App.save(); updateSummary();
+    });
+  });
+  document.querySelectorAll('#cat-lebenserhaltung select, #cat-freizeit select, #cat-wohnen select, #cat-kommunikation select, #cat-kinder select, #cat-mobilitaet select, #cat-versicherungen select, #cat-finanzen select').forEach(el => {
+    el.addEventListener('change', () => {
+      const cat = el.dataset.cat, item = el.dataset.item;
+      App.getData().private_ausgaben.kategorien[cat][item].zahlweise = el.value;
+      App.save(); updateSummary();
+    });
+  });
+}
+
+function buildEinnahmen() {
+  const d = App.getData().private_einnahmen;
+  const grid = document.getElementById('einnahmen-grid');
+  let html = '';
+  for (let key in einnahmenMap) {
+    html += '<div class="form-group"><label>' + App.t(einnahmenMap[key]) + '</label><input type="number" class="form-control" data-einnahme="' + key + '" value="' + (d[key]||0) + '"></div>';
+  }
+  grid.innerHTML = html;
+  grid.querySelectorAll('input').forEach(el => {
+    el.addEventListener('change', () => {
+      App.getData().private_einnahmen[el.dataset.einnahme] = App.parseVal(el.value);
+      App.save(); updateSummary();
+    });
+  });
+}
+
+function updateEntnahmeLabel() {
+  const rf = App.getData().stammdaten.rechtsform || 'Einzelunternehmen';
+  const personenGesellschaften = ['Einzelunternehmen', 'Kollektivgesellschaft', 'Kommanditgesellschaft'];
+  const isPerson = personenGesellschaften.indexOf(rf) !== -1;
+
+  document.getElementById('title-withdrawal').style.display = isPerson ? '' : 'none';
+  document.getElementById('title-salary').style.display = isPerson ? 'none' : '';
+  document.getElementById('label-withdrawal').style.display = isPerson ? '' : 'none';
+  document.getElementById('label-salary').style.display = isPerson ? 'none' : '';
+}
+
+function updateSummary() {
+  const m1 = App.calcMindesteinkommen(1);
+  const m2 = App.calcMindesteinkommen(2);
+  document.getElementById('sum-ausgaben').textContent = 'CHF ' + App.fmt(m1.ausgaben.monatlich);
+  document.getElementById('sum-einnahmen').textContent = 'CHF ' + App.fmt(m1.einnahmen);
+  document.getElementById('sum-mindest-m').textContent = 'CHF ' + App.fmt(m1.monatlich);
+  document.getElementById('sum-lohn').textContent = 'CHF ' + App.fmt(m1.lohnMonatlich);
+  document.getElementById('sum-mindest-j').textContent = 'CHF ' + App.fmt(m1.jaehrlich);
+  document.getElementById('sum-mindest-j2').textContent = 'CHF ' + App.fmt(m2.jaehrlich);
+  const deckBox = document.getElementById('sum-deck-box');
+  const deckEl = document.getElementById('sum-deck');
+  const totalIncome = m1.lohnMonatlich + m1.einnahmen;
+  if (totalIncome >= m1.ausgaben.monatlich) {
+    deckBox.className = 'summary-box success';
+    deckEl.textContent = App.t('private_costs_covered');
+  } else {
+    deckBox.className = 'summary-box danger';
+    deckEl.textContent = App.t('private_costs_not_covered');
+  }
+}
+
+function initPage() {
+  document.getElementById('ab-haushalt').value = App.getData().private_ausgaben.haushaltstyp;
+  document.getElementById('ab-haushalt').addEventListener('change', () => {
+    App.getData().private_ausgaben.haushaltstyp = document.getElementById('ab-haushalt').value;
+    App.save();
+  });
+  buildAusgaben(); buildEinnahmen(); updateSummary();
+
+  // Standalone owner-salary input (Private Entnahme)
+  const lohnEl = document.getElementById('inhaber-lohn');
+  lohnEl.value = App.getData().private_einnahmen.monatlicher_lohn_inhaber || 0;
+  lohnEl.addEventListener('change', () => {
+    App.getData().private_einnahmen.monatlicher_lohn_inhaber = App.parseVal(lohnEl.value);
+    App.save(); updateSummary();
+  });
+  updateEntnahmeLabel();
+}
+window.pageInit = initPage;
+</script>
+</body>
+</html>

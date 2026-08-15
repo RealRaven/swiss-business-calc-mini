@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="revenue_jahr2_title">Umsatz Jahr 2</title>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">📊 <span data-i18n="brand">Business Kalkulation <span>Schweiz</span></span></div>
+    <div class="nav-apps">
+      <button class="nav-apps-toggle" id="nav-apps-toggle" aria-label="Menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+      <div class="nav-apps-dropdown" id="nav-apps-dropdown">
+        <a href="../index.html" data-i18n="nav_overview">Overview</a>
+        <a href="masterdata.html" data-i18n="nav_master">Master Data</a>
+        <a href="private.html" data-i18n="nav_private">Private Budget</a>
+        <a href="investments.html" data-i18n="nav_invest">Investments J1</a>
+        <a href="costs.html" data-i18n="nav_costs">Operating Costs J1</a>
+        <a href="revenue.html" data-i18n="nav_revenue">Revenue J1</a>
+        <a href="profit.html" data-i18n="nav_profit">Profit J1</a>
+        <a href="liquidity.html" data-i18n="nav_liquidity">Liquidity J1</a>
+        <a href="investments_year2.html" data-i18n="nav_invest_jahr2">Investments J2</a>
+        <a href="costs_year2.html" data-i18n="nav_costs_jahr2">Operating Costs J2</a>
+        <a href="revenue_year2.html" data-i18n="nav_revenue_jahr2">Revenue J2</a>
+        <a href="profit_year2.html" data-i18n="nav_profit_jahr2">Profit J2</a>
+        <a href="liquidity_year2.html" data-i18n="nav_liquidity_jahr2">Liquidity J2</a>
+        <a href="hourlyrate.html" data-i18n="nav_hourly">Hourly Rate</a>
+        <a href="productcalc.html" data-i18n="nav_productcalc">Product Calculation</a>
+      </div>
+    </div>
+    <div class="lang-switcher">
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+    <button class="btn btn-sm" id="btn-pdf" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);white-space:nowrap;" onclick="App.exportPDF()" data-i18n="pdf">PDF</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-header">
+    <h1 data-i18n="revenue_jahr2_title">Umsatzplanung Jahr 2</h1>
+    <p data-i18n="revenue_desc">Bis zu 4 Angebotsklassen mit monatlichem Verlauf, Preisen, MWST-Satz und variablem Ressourceneinsatz.</p>
+  </div>
+
+  <div class="info-box">
+    <strong data-i18n="revenue_info_label">Ressourceneinsatz:</strong> <span data-i18n="revenue_info_text">Variable Kosten in % vom Netto-Umsatz (Waren, Material, Rohstoffe, variable Löhne, etc.), die direkt dem Angebot zuzuordnen sind. Der Rest ist Ihr Deckungsbeitrag.</span>
+  </div>
+
+  <div id="angebote-container"></div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="revenue_summary">Umsatz-Zusammenfassung</div>
+    <div class="card-body">
+      <div class="grid grid-5">
+        <div class="summary-box"><div class="label" data-i18n="revenue_gross">Brutto-Umsatz</div><div class="value" id="u-brutto">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="revenue_vat">MWST</div><div class="value" id="u-mwst">CHF 0.00</div></div>
+        <div class="summary-box"><div class="label" data-i18n="revenue_net">Netto-Umsatz</div><div class="value" id="u-netto">CHF 0.00</div></div>
+        <div class="summary-box warning"><div class="label" data-i18n="revenue_resources">Ressourceneinsatz</div><div class="value" id="u-res">CHF 0.00</div></div>
+        <div class="summary-box success"><div class="label" data-i18n="revenue_contribution">Deckungsbeitrag</div><div class="value" id="u-deck">CHF 0.00</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../src/js/i18n.js"></script>
+<script src="../src/js/app.js"></script>
+<script>
+const monate = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const mwstOptionen = [
+  {v:8.1, k:'vat_normal'},
+  {v:2.6, k:'vat_reduced'},
+  {v:3.8, k:'vat_special'},
+  {v:0, k:'vat_exempt'}
+];
+
+function buildUmsatz() {
+  const container = document.getElementById('angebote-container');
+  container.innerHTML = '';
+  const d = App.getData().umsatz_jahr2.angebote;
+  d.forEach((a, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    let html = '<div class="card-header">' + a.name + ' <input class="form-control" style="width:200px;display:inline-block;margin-left:10px" value="' + a.name + '" data-idx="' + idx + '" data-f="name"></div>';
+    html += '<div class="card-body">';
+    html += '<div class="grid grid-3">';
+    html += '<div class="form-group"><label>' + App.t('revenue_unit_price_gross') + '</label><input type="number" class="form-control" value="' + a.einzelpreis_brutto + '" data-idx="' + idx + '" data-f="einzelpreis_brutto"></div>';
+    html += '<div class="form-group"><label>' + App.t('revenue_vat_rate') + '</label><select class="form-control" data-idx="' + idx + '" data-f="mwst_satz">' + mwstOptionen.map(o => '<option value="' + o.v + '"' + (Math.abs(o.v - a.mwst_satz)<0.01?' selected':'') + '>' + App.t(o.k) + '</option>').join('') + '</select></div>';
+    html += '<div class="form-group"><label>' + App.t('revenue_resource_input') + '</label><input type="number" class="form-control" value="' + a.ressourceneinsatz_pct + '" data-idx="' + idx + '" data-f="ressourceneinsatz_pct"></div>';
+    html += '</div>';
+    html += '<div class="mt-2"><label>' + App.t('revenue_sales_per_month') + '</label><div class="month-labels">' + monate.map(m => '<span>' + App.t(m) + '</span>').join('') + '</div>';
+    html += '<div class="month-grid">' + a.verkaufszahlen.map((v, m) => '<input type="number" value="' + v + '" data-idx="' + idx + '" data-m="' + m + '">').join('') + '</div></div>';
+    html += '</div>';
+    card.innerHTML = html;
+    container.appendChild(card);
+  });
+  bindUmsatz();
+  updateSummary();
+}
+
+function bindUmsatz() {
+  document.querySelectorAll('input[data-idx], select[data-idx]').forEach(el => {
+    el.onchange = () => {
+      const d = App.getData().umsatz_jahr2.angebote[el.dataset.idx];
+      if (el.dataset.f === 'name') d.name = el.value;
+      else if (el.dataset.f) {
+        let v = el.type === 'number' || el.tagName === 'SELECT' ? App.parseVal(el.value) : el.value;
+        d[el.dataset.f] = v;
+      } else if (el.dataset.m !== undefined) {
+        d.verkaufszahlen[parseInt(el.dataset.m)] = App.parseVal(el.value);
+      }
+      App.save(); updateSummary();
+    };
+  });
+}
+
+function updateSummary() {
+  const u = App.calcUmsatzJahr2();
+  document.getElementById('u-brutto').textContent = 'CHF ' + App.fmt(u.gesamtBrutto);
+  document.getElementById('u-mwst').textContent = 'CHF ' + App.fmt(u.gesamtMwst);
+  document.getElementById('u-netto').textContent = 'CHF ' + App.fmt(u.gesamtNetto);
+  document.getElementById('u-res').textContent = 'CHF ' + App.fmt(u.gesamtRessource);
+  document.getElementById('u-deck').textContent = 'CHF ' + App.fmt(u.gesamtDeckung);
+}
+window.pageInit = buildUmsatz;
+</script>
+</body>
+</html>

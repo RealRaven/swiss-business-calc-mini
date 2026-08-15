@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../src/css/style.css"><title data-i18n="masterdata_title">Stammdaten – Business Kalkulation CH</title>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">📊 <span data-i18n="brand">Business Kalkulation <span>Schweiz</span></span></div>
+    <div class="nav-apps">
+      <button class="nav-apps-toggle" id="nav-apps-toggle" aria-label="Menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+      <div class="nav-apps-dropdown" id="nav-apps-dropdown">
+        <a href="../index.html" data-i18n="nav_overview">Overview</a>
+        <a href="masterdata.html" data-i18n="nav_master">Master Data</a>
+        <a href="private.html" data-i18n="nav_private">Private Budget</a>
+        <a href="investments.html" data-i18n="nav_invest">Investments J1</a>
+        <a href="costs.html" data-i18n="nav_costs">Operating Costs J1</a>
+        <a href="revenue.html" data-i18n="nav_revenue">Revenue J1</a>
+        <a href="profit.html" data-i18n="nav_profit">Profit J1</a>
+        <a href="liquidity.html" data-i18n="nav_liquidity">Liquidity J1</a>
+        <a href="investments_year2.html" data-i18n="nav_invest_jahr2">Investments J2</a>
+        <a href="costs_year2.html" data-i18n="nav_costs_jahr2">Operating Costs J2</a>
+        <a href="revenue_year2.html" data-i18n="nav_revenue_jahr2">Revenue J2</a>
+        <a href="profit_year2.html" data-i18n="nav_profit_jahr2">Profit J2</a>
+        <a href="liquidity_year2.html" data-i18n="nav_liquidity_jahr2">Liquidity J2</a>
+        <a href="hourlyrate.html" data-i18n="nav_hourly">Hourly Rate</a>
+        <a href="productcalc.html" data-i18n="nav_productcalc">Product Calculation</a>
+      </div>
+    </div>
+    <div class="lang-switcher">
+      <select id="lang-select" class="lang-select" aria-label="Language">
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="it">🇮🇹 Italiano</option>
+      </select>
+    </div>
+    <button class="btn btn-sm" id="btn-pdf" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);white-space:nowrap;" onclick="App.exportPDF()" data-i18n="pdf">PDF</button>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-header">
+    <h1 data-i18n="masterdata_heading">Unternehmensstammdaten</h1>
+    <p data-i18n="masterdata_desc">Grundlegende Angaben zu Ihrem Unternehmen in der Schweiz.</p>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-header" data-i18n="masterdata_general">Allgemeine Angaben</div>
+      <div class="card-body">
+        <div class="form-group"><label data-i18n="masterdata_label_owner">Firmenname / Inhaber</label><input type="text" class="form-control" id="st-inhaber"></div>
+        <div class="form-group"><label data-i18n="masterdata_label_address">Adresse</label><input type="text" class="form-control" id="st-adresse"></div>
+        <div class="form-group"><label data-i18n="masterdata_label_zip_city">PLZ / Ort</label><input type="text" class="form-control" id="st-plz"></div>
+        <div class="form-group"><label data-i18n="masterdata_label_business_idea">Geschäftsidee</label><textarea class="form-control" id="st-idee"></textarea></div>
+        <div class="form-group"><label data-i18n="masterdata_label_product_service">Produkt / Leistung</label><textarea class="form-control" id="st-produkt"></textarea></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" data-i18n="masterdata_legal_tax">Rechtliches & Steuern</div>
+      <div class="card-body">
+        <div class="form-group"><label data-i18n="masterdata_label_legal_form">Rechtsform</label>
+          <select class="form-control" id="st-rechtsform">
+            <option>Einzelunternehmen</option><option>Kollektivgesellschaft</option><option>Kommanditgesellschaft</option>
+            <option>GmbH</option><option>AG</option><option>Genossenschaft</option><option>Verein</option>
+          </select>
+        </div>
+        <div class="form-group"><label data-i18n="masterdata_label_canton">Kanton</label>
+          <select class="form-control" id="st-kanton">
+            <option>ZH</option><option>BE</option><option>LU</option><option>UR</option><option>SZ</option><option>OW</option><option>NW</option><option>GL</option><option>ZG</option><option>FR</option><option>SO</option><option>BS</option><option>BL</option><option>SH</option><option>AR</option><option>AI</option><option>SG</option><option>GR</option><option>AG</option><option>TG</option><option>TI</option><option>VD</option><option>VS</option><option>NE</option><option>GE</option><option>JU</option>
+          </select>
+        </div>
+        <div class="form-group"><label data-i18n="masterdata_label_founding_year">Gründungsjahr</label><input type="number" class="form-control" id="st-jahr"></div>
+        <div class="form-group"><label data-i18n="masterdata_label_founding_month">Gründungsmonat (1-12)</label><input type="number" class="form-control" id="st-monat" min="1" max="12"></div>
+        <div class="form-group"><label data-i18n="masterdata_label_commercial">Gewerbebetrieb</label>
+          <select class="form-control" id="st-gewerbe"><option value="1" data-i18n="masterdata_yes">Ja</option><option value="0" data-i18n="masterdata_no">Nein</option></select>
+        </div>
+        <div class="form-group"><label data-i18n="masterdata_label_vat_liable">MWST-pflichtig</label>
+          <select class="form-control" id="st-mwst"><option value="1" data-i18n="masterdata_yes">Ja</option><option value="0" data-i18n="masterdata_no">Nein</option></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" data-i18n="masterdata_vat_rates">Mehrwertsteuer-Sätze Schweiz</div>
+    <div class="card-body">
+      <div class="grid grid-3">
+        <div class="form-group"><label data-i18n="masterdata_label_vat_normal">Normalsatz (%)</label><input type="number" step="0.1" class="form-control" id="st-mwst-n"></div>
+        <div class="form-group"><label data-i18n="masterdata_label_vat_reduced">Ermässigter Satz (%)</label><input type="number" step="0.1" class="form-control" id="st-mwst-e"></div>
+        <div class="form-group"><label data-i18n="masterdata_label_vat_special">Spezial-Satz Beherbergung (%)</label><input type="number" step="0.1" class="form-control" id="st-mwst-s"></div>
+      </div>
+      <p class="mt-1" style="font-size:0.85rem;color:var(--text-light)" data-i18n="masterdata_vat_info">
+        Aktuelle MWST-Sätze Schweiz: Normal 8.1%, ermässigt 2.6%, Spezial (Beherbergung) 3.8%.
+        MWST-Pflicht ab CHF 100'000 Umsatz bzw. bei freiwilliger Anmeldung.
+      </p>
+    </div>
+  </div>
+</div>
+<script src="../src/js/i18n.js"></script>
+<script src="../src/js/app.js"></script>
+<script>
+function initPage() {
+  const d = App.getData().stammdaten;
+  const fields = {
+    'st-inhaber': d.inhaber, 'st-adresse': d.adresse, 'st-plz': d.plz_ort,
+    'st-idee': d.geschaeftsidee, 'st-produkt': d.produkt_leistung,
+    'st-rechtsform': d.rechtsform, 'st-kanton': d.kanton,
+    'st-jahr': d.gruendungsjahr, 'st-monat': d.gruendungsmonat,
+    'st-gewerbe': d.gewerbe ? '1' : '0', 'st-mwst': d.mwst_pflichtig ? '1' : '0',
+    'st-mwst-n': d.mwst_satz_normal, 'st-mwst-e': d.mwst_satz_ermaessigt, 'st-mwst-s': d.mwst_satz_spezial
+  };
+  for (let id in fields) { const el = document.getElementById(id); if(el) el.value = fields[id]; }
+  const bind = (id, path) => {
+    const el = document.getElementById(id);
+    el.addEventListener('change', () => {
+      let obj = App.getData().stammdaten;
+      for (let i = 0; i < path.length - 1; i++) obj = obj[path[i]];
+      let v = el.type === 'select-one' ? (el.value === '1' ? true : el.value === '0' ? false : el.value) : (el.type === 'number' ? App.parseVal(el.value) : el.value);
+      obj[path[path.length - 1]] = v;
+      App.save();
+    });
+  };
+  bind('st-inhaber',['inhaber']); bind('st-adresse',['adresse']); bind('st-plz',['plz_ort']);
+  bind('st-idee',['geschaeftsidee']); bind('st-produkt',['produkt_leistung']);
+  bind('st-rechtsform',['rechtsform']); bind('st-kanton',['kanton']);
+  bind('st-jahr',['gruendungsjahr']); bind('st-monat',['gruendungsmonat']);
+  bind('st-gewerbe',['gewerbe']); bind('st-mwst',['mwst_pflichtig']);
+  bind('st-mwst-n',['mwst_satz_normal']); bind('st-mwst-e',['mwst_satz_ermaessigt']); bind('st-mwst-s',['mwst_satz_spezial']);
+}
+window.pageInit = initPage;
+</script>
+</body>
+</html>
