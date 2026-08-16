@@ -95,6 +95,19 @@ const kats = [
 function buildKosten() {
   const container = document.getElementById('kosten-container');
   container.innerHTML = '';
+
+  // Mandatory insurance reminder
+  const rf = App.getData().stammdaten.rechtsform || 'Einzelunternehmen';
+  const hasEmployees = ['GmbH','AG','Genossenschaft','Verein'].indexOf(rf) !== -1 ||
+                       App.getData().betriebliche_kosten_jahr2.kategorien.personal.eintraege.length > 0;
+  if (hasEmployees) {
+    const warn = document.createElement('div');
+    warn.className = 'info-box';
+    warn.style.cssText = 'margin-bottom:1rem;border-left-color:var(--warning);';
+    warn.innerHTML = App.t('costs_insurance_hint');
+    container.appendChild(warn);
+  }
+
   kats.forEach(kat => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -167,13 +180,29 @@ function updateSummary() {
 }
 
 function showCorpHint() {
+  const existing = document.getElementById('corp-hint');
+  if (existing) existing.remove();
+
   const rf = App.getData().stammdaten.rechtsform || 'Einzelunternehmen';
   const isCorp = ['GmbH','AG','Genossenschaft','Verein'].indexOf(rf) !== -1;
   if (!isCorp) return;
+
+  const rfMap = {
+    'Einzelunternehmen':'legal_einzelunternehmen',
+    'Kollektivgesellschaft':'legal_kollektivgesellschaft',
+    'Kommanditgesellschaft':'legal_kommanditgesellschaft',
+    'GmbH':'legal_gmbh',
+    'AG':'legal_ag',
+    'Genossenschaft':'legal_genossenschaft',
+    'Verein':'legal_verein'
+  };
+  const rfTranslated = App.t(rfMap[rf] || rf);
+
   const box = document.createElement('div');
+  box.id = 'corp-hint';
   box.className = 'info-box';
   box.style.cssText = 'margin-bottom:1rem;border-left-color:var(--warning);';
-  box.innerHTML = '<strong>Kapitalgesellschaft (' + rf + '):</strong> Ihr eigener Geschäftsführerlohn (Brutto inkl. Arbeitgeber-Sozialabgaben) gehört in die Kategorie <em>1. Personal</em>. Erfassen Sie ihn nicht im Privatbudget als Betriebskosten.';
+  box.innerHTML = App.t('costs_corp_hint').replace('{{rf}}', rfTranslated);
   const container = document.getElementById('kosten-container');
   container.parentNode.insertBefore(box, container);
 }

@@ -16,7 +16,8 @@ const App = (function() {
       geschaeftsidee: '', produkt_leistung: '', rechtsform: 'Einzelunternehmen',
       gruendungsjahr: 2026, gruendungsmonat: 1, kanton: 'ZH',
       gewerbe: true, mwst_pflichtig: true,
-      mwst_satz_normal: 8.1, mwst_satz_ermaessigt: 2.6, mwst_satz_spezial: 3.8
+      mwst_satz_normal: 8.1, mwst_satz_ermaessigt: 2.6, mwst_satz_spezial: 3.8,
+      eigenkapital: 0
     },
     private_ausgaben: {
       haushaltstyp: 'gesamter_haushalt',
@@ -45,11 +46,11 @@ const App = (function() {
         {bezeichnung:'Auto', restwert:0, nd:5, afa:0}
       ],
       neu: [
-        {bezeichnung:'Laptop', betrag_brutto:0, nd:3, afa:0},
-        {bezeichnung:'Geschaeftsausstattung', betrag_brutto:0, nd:10, afa:0},
-        {bezeichnung:'Mobiltelefon', betrag_brutto:0, nd:3, afa:0},
-        {bezeichnung:'Homepage', betrag_brutto:0, nd:3, afa:0},
-        {bezeichnung:'Software', betrag_brutto:0, nd:3, afa:0}
+        {bezeichnung:'Laptop', betrag_brutto:0, mwst:8.1, nd:3, afa:0},
+        {bezeichnung:'Geschaeftsausstattung', betrag_brutto:0, mwst:8.1, nd:10, afa:0},
+        {bezeichnung:'Mobiltelefon', betrag_brutto:0, mwst:8.1, nd:3, afa:0},
+        {bezeichnung:'Homepage', betrag_brutto:0, mwst:8.1, nd:3, afa:0},
+        {bezeichnung:'Software', betrag_brutto:0, mwst:8.1, nd:3, afa:0}
       ],
       gruendungskosten: [
         {bezeichnung:'Handelsregistereintrag', betrag_netto:0, mwst:8.1},
@@ -73,7 +74,11 @@ const App = (function() {
         beratung: {eintraege: []},
         gebuehren: {eintraege: [{bezeichnung:'Handelsregistergebuehr', betrag:0, zahlweise:'jaerlich', startmonat:1}]},
         kfz: {eintraege: []},
-        versicherungen: {eintraege: [{bezeichnung:'Haftpflicht', betrag:0, zahlweise:'jaerlich', startmonat:1}]},
+        versicherungen: {eintraege: [
+          {bezeichnung:'Haftpflicht', betrag:0, zahlweise:'jaerlich', startmonat:1},
+          {bezeichnung:'BVG / Berufliche Vorsorge (Arbeitgeberanteil)', betrag:0, zahlweise:'monatlich', startmonat:1},
+          {bezeichnung:'UVG / Unfallversicherung (obligatorisch)', betrag:0, zahlweise:'monatlich', startmonat:1}
+        ]},
         weiterbildung: {eintraege: []},
         geringwertig: {eintraege: []},
         software: {eintraege: []},
@@ -94,13 +99,27 @@ const App = (function() {
       ahv_satz: 10.6, iv_satz: 1.4, eo_satz: 0.5,
       ahv_iv_eo_total: 12.5, alv_optional: 2.2,
       krankenkasse_gesch: 300,
+      // --- NEW: employer social contribution estimates ---
+      bvg_arbeitgeber_satz: 4.0,   // BVG employer share (varies 3–7%)
+      uvg_satz: 1.5,               // Accident insurance (varies 0.5–3%)
+      fak_satz: 0.5,               // Family compensation fund
+      ktg_satz: 1.0,               // Daily sickness benefits
+      nbuv_satz: 1.5,              // Non-occupational accident
+      // ---
       gewinnsteuer_kantone: {
-        ZH: 19.6, BE: 20.5, LU: 12.2, UR: 12.6, SZ: 14.1,
-        OW: 12.7, NW: 12.0, GL: 13.3, ZG: 11.9, FR: 13.7,
+        ZH: 19.47, BE: 20.54, LU: 11.66, UR: 12.6, SZ: 14.1,
+        OW: 12.7, NW: 12.0, GL: 13.3, ZG: 11.71, FR: 13.7,
         SO: 13.0, BS: 13.0, BL: 16.0, SH: 13.8, AR: 13.0,
-        AI: 12.7, SG: 14.5, GR: 14.0, AG: 15.1, TG: 13.4,
+        AI: 12.7, SG: 14.5, GR: 14.0, AG: 15.0, TG: 13.4,
         TI: 16.0, VD: 14.0, VS: 17.1, NE: 13.6, GE: 14.7, JU: 15.4
       },
+      kapitalsteuer_kantone: {
+        ZH: 0.25, BE: 0.25, LU: 0.15, UR: 0.10, SZ: 0.05, OW: 0.10, NW: 0.10,
+        GL: 0.35, ZG: 0.04, FR: 0.16, SO: 0.20, BS: 0.20, BL: 0.25, SH: 0.15,
+        AR: 0.15, AI: 0.15, SG: 0.15, GR: 0.488, AG: 0.20, TG: 0.15, TI: 0.15,
+        VD: 0.30, VS: 0.20, NE: 0.10, GE: 0.15, JU: 0.18
+      },
+      kapitalsteuer_ohne_verrechnung: ['ZG'],
       einkommenssteuer: {
         progressionsstufen: [
           {bis:20000, satz:0}, {bis:40000, satz:0.02}, {bis:80000, satz:0.06},
@@ -111,11 +130,11 @@ const App = (function() {
     liquiditaet: { startguthaben: 0, privateinlage: 0, fremdkapital: 0, foerderungen: 0 },
     investitionen_jahr2: {
       neu: [
-        {bezeichnung:'Laptop', betrag_brutto:0, nd:3, afa:0},
-        {bezeichnung:'Geschaeftsausstattung', betrag_brutto:0, nd:10, afa:0},
-        {bezeichnung:'Mobiltelefon', betrag_brutto:0, nd:3, afa:0},
-        {bezeichnung:'Homepage', betrag_brutto:0, nd:3, afa:0},
-        {bezeichnung:'Software', betrag_brutto:0, nd:3, afa:0}
+        {bezeichnung:'Laptop', betrag_brutto:0, mwst:8.1, nd:3, afa:0},
+        {bezeichnung:'Geschaeftsausstattung', betrag_brutto:0, mwst:8.1, nd:10, afa:0},
+        {bezeichnung:'Mobiltelefon', betrag_brutto:0, mwst:8.1, nd:3, afa:0},
+        {bezeichnung:'Homepage', betrag_brutto:0, mwst:8.1, nd:3, afa:0},
+        {bezeichnung:'Software', betrag_brutto:0, mwst:8.1, nd:3, afa:0}
       ],
       nicht_aktivierungsplichtig: [
         {bezeichnung:'Geringwertige Anschaffung', betrag_brutto:0}
@@ -207,8 +226,53 @@ const App = (function() {
           deepMerge(target[k], source[k]);
         } else if (target[k] === undefined) target[k] = source[k];
       }
+      if (data.investitionen && data.investitionen.neu) {
+        data.investitionen.neu.forEach(function(i) {
+          if (i.mwst === undefined) i.mwst = 8.1;
+        });
+      }
+      if (data.investitionen_jahr2 && data.investitionen_jahr2.neu) {
+        data.investitionen_jahr2.neu.forEach(function(i) {
+          if (i.mwst === undefined) i.mwst = 8.1;
+        });
+      }
     }
     deepMerge(data, defaultData);
+
+    // --- Migrate existing users: add eigenkapital if missing ---
+    if (data.stammdaten && data.stammdaten.eigenkapital === undefined) {
+      data.stammdaten.eigenkapital = 0;
+    }
+    // --- Migrate existing users: add Kapitalsteuer data if missing ---
+    if (data.steuern_ch) {
+      if (!data.steuern_ch.kapitalsteuer_kantone) {
+        data.steuern_ch.kapitalsteuer_kantone = defaultData.steuern_ch.kapitalsteuer_kantone;
+      }
+      if (!data.steuern_ch.kapitalsteuer_ohne_verrechnung) {
+        data.steuern_ch.kapitalsteuer_ohne_verrechnung = defaultData.steuern_ch.kapitalsteuer_ohne_verrechnung;
+      }
+    }
+
+    // --- NEW: Migrate existing users – add BVG/UVG if missing ---
+    function addInsuranceIfMissing(katObj, bezeichnung, zahlweise, startmonat) {
+      if (!katObj || !katObj.eintraege) return;
+      const exists = katObj.eintraege.some(function(e) {
+        return e.bezeichnung && e.bezeichnung.toLowerCase().indexOf(bezeichnung.toLowerCase()) !== -1;
+      });
+      if (!exists) {
+        katObj.eintraege.push({bezeichnung: bezeichnung, betrag: 0, zahlweise: zahlweise, startmonat: startmonat});
+      }
+    }
+    // Year 1
+    addInsuranceIfMissing(data.betriebliche_kosten_jahr1.kategorien.versicherungen,
+      'BVG / Berufliche Vorsorge (Arbeitgeberanteil)', 'monatlich', 1);
+    addInsuranceIfMissing(data.betriebliche_kosten_jahr1.kategorien.versicherungen,
+      'UVG / Unfallversicherung (obligatorisch)', 'monatlich', 1);
+    // Year 2
+    addInsuranceIfMissing(data.betriebliche_kosten_jahr2.kategorien.versicherungen,
+      'BVG / Berufliche Vorsorge (Arbeitgeberanteil)', 'monatlich', 1);
+    addInsuranceIfMissing(data.betriebliche_kosten_jahr2.kategorien.versicherungen,
+      'UVG / Unfallversicherung (obligatorisch)', 'monatlich', 1);
   }
 
   function save() {
@@ -302,8 +366,11 @@ const App = (function() {
       i.afa = rw / nd; bestehendeAfa += i.afa; bestehendeRest += rw;
     });
     inv.neu.forEach(function(i) {
-      const b = parseVal(i.betrag_brutto); const nd = parseVal(i.nd) || 1;
-      i.afa = b / nd; neueAfa += i.afa; neueBrutto += b;
+      const b = parseVal(i.betrag_brutto);
+      const mwst = parseVal(i.mwst) || 0;
+      const netto = mwst > 0 ? b / (1 + mwst/100) : b;
+      const nd = parseVal(i.nd) || 1;
+      i.afa = netto / nd; neueAfa += i.afa; neueBrutto += b;
     });
     const gruendung = inv.gruendungskosten.reduce(function(s, i) { return s + parseVal(i.betrag_netto) * (1 + parseVal(i.mwst)/100); }, 0);
     return { bestehendeAfa, neueAfa, gesamtAfa: bestehendeAfa + neueAfa, bestehendeRest, neueBrutto, gruendung };
@@ -314,8 +381,10 @@ const App = (function() {
     const result = { monatlich: {}, jaehrlich: {}, gesamtMonatlich: 0, gesamtJaehrlich: 0, monatsArray: Array(12).fill(0) };
     for (let k in kat) {
       const monate = Array(12).fill(0);
+      let katMonatlich = 0;
       kat[k].eintraege.forEach(function(e) {
         const b = parseVal(e.betrag); const zw = e.zahlweise || 'monatlich'; const sm = (e.startmonat || 1) - 1;
+        katMonatlich += monatlicherBetrag(b, zw);
         if (zw === 'monatlich') { for (let m = sm; m < 12; m++) monate[m] += b; }
         else if (zw === 'zweimonatlich') { for (let m = sm; m < 12; m += 2) monate[m] += b; }
         else if (zw === 'quartalsweise') { for (let m = sm; m < 12; m += 3) monate[m] += b; }
@@ -323,9 +392,10 @@ const App = (function() {
         else if (zw === 'jaerlich') { if (sm < 12) monate[sm] += b; }
       });
       const kj = monate.reduce(function(a, b) { return a + b; }, 0);
-      const km = kj / 12;
-      result.monatlich[k] = km; result.jaehrlich[k] = kj;
-      result.gesamtMonatlich += km; result.gesamtJaehrlich += kj;
+      result.monatlich[k] = katMonatlich;
+      result.jaehrlich[k] = kj;
+      result.gesamtMonatlich += katMonatlich;
+      result.gesamtJaehrlich += kj;
       for (let m = 0; m < 12; m++) result.monatsArray[m] += monate[m];
     }
     return result;
@@ -363,14 +433,20 @@ const App = (function() {
   }
 
   function calcGewinn() {
-    const umsatz = calcUmsatz(); const kosten = calcBetrieblicheKosten(); const invest = calcInvestitionen();
-    const mindest = calcMindesteinkommen(1); const afa = invest.gesamtAfa; const deckung = umsatz.gesamtDeckung;
+    const umsatz = calcUmsatz(); 
+    const kosten = calcBetrieblicheKosten(); 
+    const invest = calcInvestitionen();
+    const mindest = calcMindesteinkommen(1); 
+    const afa = invest.gesamtAfa; 
+    const deckung = umsatz.gesamtDeckung;
     const betriebsergebnis = deckung - kosten.gesamtJaehrlich - afa;
     const rechtsform = data.stammdaten.rechtsform || 'Einzelunternehmen';
     const kanton = data.stammdaten.kanton || 'ZH';
     const personengesellschaften = ['Einzelunternehmen', 'Kollektivgesellschaft', 'Kommanditgesellschaft'];
     const isPersonengesellschaft = personengesellschaften.indexOf(rechtsform) !== -1;
-    let ahvIvEo = 0, est = 0, steuerTyp = '', steuerLabel = '';
+    
+    let ahvIvEo = 0, ahvLohn = 0, est = 0, steuerTyp = '', steuerLabel = '';
+    
     if (isPersonengesellschaft) {
       ahvIvEo = Math.max(0, betriebsergebnis) * (data.steuern_ch.ahv_iv_eo_total / 100);
       const estBmg = Math.max(0, betriebsergebnis - ahvIvEo);
@@ -378,15 +454,50 @@ const App = (function() {
       steuerTyp = 'einkommenssteuer';
       steuerLabel = 'Einkommenssteuer (vereinfacht)';
     } else {
-      ahvIvEo = 0;
+      // Kapitalgesellschaft: AHV/IV/EO wird über Lohnabrechnung abgeführt
+      // Schätze Arbeitgeberanteil aus Personalkosten (Kategorie 1)
+      // Gesamtsatz AHV/IV/EO + ALV ≈ 14.7%; Arbeitgeberanteil ≈ Hälfte = 7.35%
+      // Zusätzlich FAK/NBUV/KTG ca. 2–4% → Planungsschätzung ca. 10% als Obergrenze
+      // NEW: Comprehensive employer social contributions (AHV/IV/EO/ALV + BVG + UVG + FAK + KTG + NBUV)
+      const personalKosten = kosten.jaehrlich['personal'] || 0;
+      const st = data.steuern_ch;
+      const ahvAlvRate = (st.ahv_iv_eo_total + (st.alv_optional || 0)) / 2 / 100;
+      const bvgRate    = (st.bvg_arbeitgeber_satz || 4.0) / 100;
+      const uvgRate    = (st.uvg_satz || 1.5) / 100;
+      const fakRate    = (st.fak_satz || 0.5) / 100;
+      const ktgRate    = (st.ktg_satz || 1.0) / 100;
+      const nbuvRate   = (st.nbuv_satz || 1.5) / 100;
+      ahvLohn = personalKosten * (ahvAlvRate + bvgRate + uvgRate + fakRate + ktgRate + nbuvRate);
+      
       const kantonsMap = data.steuern_ch.gewinnsteuer_kantone || {};
       const gewinnsteuerSatz = (kantonsMap[kanton] || 15) / 100;
       est = Math.max(0, betriebsergebnis) * gewinnsteuerSatz;
       steuerTyp = 'gewinnsteuer';
       steuerLabel = App.t('profit_tax_corp') + ' (' + kanton + ', ca. ' + (kantonsMap[kanton] || 15) + '%)';
     }
-    const netto = betriebsergebnis - ahvIvEo - est;
-    return { umsatz, kosten, invest, mindest, afa, deckung, betriebsergebnis, ahvIvEo, est, netto, steuerTyp, steuerLabel, isPersonengesellschaft, rechtsform, kanton };
+    
+    // --- Kapitalsteuer (nur Kapitalgesellschaften) ---
+    let kapitalsteuer = 0, kapitalsteuerLabel = '';
+    if (!isPersonengesellschaft) {
+      const kantonsMapK = data.steuern_ch.kapitalsteuer_kantone || {};
+      const kstSatz = (kantonsMapK[kanton] || 0.2) / 100;
+      const eigenkapital = parseVal(data.stammdaten.eigenkapital) || 0;
+      const kstBerechnet = eigenkapital * kstSatz;
+      const ohneVerrechnung = (data.steuern_ch.kapitalsteuer_ohne_verrechnung || []).indexOf(kanton) !== -1;
+      if (ohneVerrechnung) {
+        kapitalsteuer = kstBerechnet;
+      } else {
+        kapitalsteuer = Math.max(0, kstBerechnet - est);
+      }
+      kapitalsteuerLabel = 'Kapitalsteuer (' + kanton + ', ca. ' + (kantonsMapK[kanton] || 0.2) + '\u2030)';
+    }
+
+    const netto = betriebsergebnis - ahvIvEo - est - kapitalsteuer;
+    return { 
+      umsatz, kosten, invest, mindest, afa, deckung, 
+      betriebsergebnis, ahvIvEo, ahvLohn, est, kapitalsteuer, kapitalsteuerLabel, netto, 
+      steuerTyp, steuerLabel, isPersonengesellschaft, rechtsform, kanton 
+    };
   }
 
   function calcLiquiditaet() {
@@ -415,6 +526,7 @@ const App = (function() {
     }
 
     if (11 >= startIdx) auszahlungen[11] += gewinn.est;
+    if (11 >= startIdx) auszahlungen[11] += (gewinn.kapitalsteuer || 0);
 
     // Private Entnahme / GF-Lohn
     // Personengesellschaft: Privatentnahme ist keine Betriebskosten, aber Liquiditätsauszahlung
@@ -511,19 +623,25 @@ const App = (function() {
     
     let jahr1NeuAfa = 0, jahr1NeuRest = 0;
     const jahr1NeuJahr2 = (inv.neu || []).map(function(i) {
-      const b = parseVal(i.betrag_brutto); const nd = parseVal(i.nd) || 1;
-      const afa = b / nd;
-      const restJahr2 = Math.max(0, b - afa);
+      const b = parseVal(i.betrag_brutto);
+      const mwst = parseVal(i.mwst) || 0;
+      const netto = mwst > 0 ? b / (1 + mwst/100) : b;
+      const nd = parseVal(i.nd) || 1;
+      const afa = netto / nd;
+      const restJahr2 = Math.max(0, netto - afa);
       const afaJahr2 = restJahr2 > 0.01 ? afa : 0;
       jahr1NeuAfa += afaJahr2;
       jahr1NeuRest += restJahr2;
-      return { bezeichnung: i.bezeichnung, betragJahr1: b, nd: nd, afaJahr1: afa, restwertJahr2: restJahr2, afaJahr2: afaJahr2 };
+      return { bezeichnung: i.bezeichnung, betragJahr1: b, mwst: mwst, netto: netto, nd: nd, afaJahr1: afa, restwertJahr2: restJahr2, afaJahr2: afaJahr2 };
     });
     
     let jahr2NeuAfa = 0, jahr2NeuBrutto = 0;
     (inv2.neu || []).forEach(function(i) {
-      const b = parseVal(i.betrag_brutto); const nd = parseVal(i.nd) || 1;
-      i.afa = b / nd; jahr2NeuAfa += i.afa; jahr2NeuBrutto += b;
+      const b = parseVal(i.betrag_brutto);
+      const mwst = parseVal(i.mwst) || 0;
+      const netto = mwst > 0 ? b / (1 + mwst/100) : b;
+      const nd = parseVal(i.nd) || 1;
+      i.afa = netto / nd; jahr2NeuAfa += i.afa; jahr2NeuBrutto += b;
     });
     
     const nichtAktiv = (inv2.nicht_aktivierungsplichtig || []).reduce(function(s, i) { return s + parseVal(i.betrag_brutto); }, 0);
@@ -544,8 +662,10 @@ const App = (function() {
     const result = { monatlich: {}, jaehrlich: {}, gesamtMonatlich: 0, gesamtJaehrlich: 0, monatsArray: Array(12).fill(0) };
     for (let k in kat) {
       const monate = Array(12).fill(0);
+      let katMonatlich = 0;
       kat[k].eintraege.forEach(function(e) {
         const b = parseVal(e.betrag); const zw = e.zahlweise || 'monatlich'; const sm = (e.startmonat || 1) - 1;
+        katMonatlich += monatlicherBetrag(b, zw);
         if (zw === 'monatlich') { for (let m = sm; m < 12; m++) monate[m] += b; }
         else if (zw === 'zweimonatlich') { for (let m = sm; m < 12; m += 2) monate[m] += b; }
         else if (zw === 'quartalsweise') { for (let m = sm; m < 12; m += 3) monate[m] += b; }
@@ -553,9 +673,10 @@ const App = (function() {
         else if (zw === 'jaerlich') { if (sm < 12) monate[sm] += b; }
       });
       const kj = monate.reduce(function(a, b) { return a + b; }, 0);
-      const km = kj / 12;
-      result.monatlich[k] = km; result.jaehrlich[k] = kj;
-      result.gesamtMonatlich += km; result.gesamtJaehrlich += kj;
+      result.monatlich[k] = katMonatlich;
+      result.jaehrlich[k] = kj;
+      result.gesamtMonatlich += katMonatlich;
+      result.gesamtJaehrlich += kj;
       for (let m = 0; m < 12; m++) result.monatsArray[m] += monate[m];
     }
     return result;
@@ -592,7 +713,8 @@ const App = (function() {
     const personengesellschaften = ['Einzelunternehmen', 'Kollektivgesellschaft', 'Kommanditgesellschaft'];
     const isPersonengesellschaft = personengesellschaften.indexOf(rechtsform) !== -1;
     
-    let ahvIvEo = 0, est = 0, steuerTyp = '', steuerLabel = '';
+    let ahvIvEo = 0, ahvLohn = 0, est = 0, steuerTyp = '', steuerLabel = '';
+    
     if (isPersonengesellschaft) {
       ahvIvEo = Math.max(0, betriebsergebnis) * (data.steuern_ch.ahv_iv_eo_total / 100);
       const estBmg = Math.max(0, betriebsergebnis - ahvIvEo);
@@ -600,15 +722,40 @@ const App = (function() {
       steuerTyp = 'einkommenssteuer';
       steuerLabel = 'Einkommenssteuer (vereinfacht)';
     } else {
-      ahvIvEo = 0;
+      const personalKosten = kosten.jaehrlich['personal'] || 0;
+      const employerAhvRate = (data.steuern_ch.ahv_iv_eo_total + (data.steuern_ch.alv_optional || 0)) / 2 / 100;
+      ahvLohn = personalKosten * employerAhvRate;
+      
       const kantonsMap = data.steuern_ch.gewinnsteuer_kantone || {};
       const gewinnsteuerSatz = (kantonsMap[kanton] || 15) / 100;
       est = Math.max(0, betriebsergebnis) * gewinnsteuerSatz;
       steuerTyp = 'gewinnsteuer';
       steuerLabel = App.t('profit_tax_corp') + ' (' + kanton + ', ca. ' + (kantonsMap[kanton] || 15) + '%)';
     }
-    const netto = betriebsergebnis - ahvIvEo - est;
-    return { umsatz, kosten, invest, mindest, afa: invest.gesamtAfa, nichtAktiv: invest.nichtAktiv, deckung: umsatz.gesamtDeckung, betriebsergebnis, ahvIvEo, est, netto, steuerTyp, steuerLabel, isPersonengesellschaft, rechtsform, kanton };
+    
+    // --- Kapitalsteuer (nur Kapitalgesellschaften) ---
+    let kapitalsteuer = 0, kapitalsteuerLabel = '';
+    if (!isPersonengesellschaft) {
+      const kantonsMapK = data.steuern_ch.kapitalsteuer_kantone || {};
+      const kstSatz = (kantonsMapK[kanton] || 0.2) / 100;
+      const eigenkapital = parseVal(data.stammdaten.eigenkapital) || 0;
+      const kstBerechnet = eigenkapital * kstSatz;
+      const ohneVerrechnung = (data.steuern_ch.kapitalsteuer_ohne_verrechnung || []).indexOf(kanton) !== -1;
+      if (ohneVerrechnung) {
+        kapitalsteuer = kstBerechnet;
+      } else {
+        kapitalsteuer = Math.max(0, kstBerechnet - est);
+      }
+      kapitalsteuerLabel = 'Kapitalsteuer (' + kanton + ', ca. ' + (kantonsMapK[kanton] || 0.2) + '\u2030)';
+    }
+
+    const netto = betriebsergebnis - ahvIvEo - est - kapitalsteuer;
+    return { 
+      umsatz, kosten, invest, mindest, afa: invest.gesamtAfa, 
+      nichtAktiv: invest.nichtAktiv, deckung: umsatz.gesamtDeckung, 
+      betriebsergebnis, ahvIvEo, ahvLohn, est, kapitalsteuer, kapitalsteuerLabel, netto, 
+      steuerTyp, steuerLabel, isPersonengesellschaft, rechtsform, kanton 
+    };
   }
 
   function calcLiquiditaetJahr2() {
@@ -638,6 +785,7 @@ const App = (function() {
     const ahvQ = gewinn.ahvIvEo / 4;
     for (let m = 2; m < 12; m += 3) auszahlungen[m] += ahvQ;
     auszahlungen[11] += gewinn.est;
+    auszahlungen[11] += (gewinn.kapitalsteuer || 0);
     
     // Private Entnahme / GF-Lohn
     // Personengesellschaft: Privatentnahme ist keine Betriebskosten, aber Liquiditätsauszahlung
@@ -798,7 +946,7 @@ const App = (function() {
       cloneContainer.querySelectorAll('input, select, textarea').forEach(function(el) {
         const span = document.createElement('span');
         span.textContent = el.value || el.textContent || '';
-        span.style.cssText = 'display:inline-block;min-width:30px;border-bottom:1px solid #999;padding:2px 4px;font-family:inherit;font-size:0.9rem;color:#333;';
+        span.style.cssText = 'display:inline-block;min-width:30px;border-bottom:1px solid #999;padding:2px 4px;font-family:inherit;font-size:0.9rem;color:#fff;';
         if (el.parentNode) el.parentNode.replaceChild(span, el);
       });
 
@@ -923,11 +1071,23 @@ const App = (function() {
     });
   }
 
+  function calcSozialabgabenArbeitgeber(bruttolohnJaehrlich) {
+    const st = data.steuern_ch;
+    const ahvAlv = bruttolohnJaehrlich * (st.ahv_iv_eo_total + (st.alv_optional || 0)) / 2 / 100;
+    const bvg    = Math.max(0, bruttolohnJaehrlich - 22680) * ((st.bvg_arbeitgeber_satz || 4.0) / 100);
+    const uvg    = bruttolohnJaehrlich * ((st.uvg_satz || 1.5) / 100);
+    const fak    = bruttolohnJaehrlich * ((st.fak_satz || 0.5) / 100);
+    const ktg    = bruttolohnJaehrlich * ((st.ktg_satz || 1.0) / 100);
+    const nbuv   = bruttolohnJaehrlich * ((st.nbuv_satz || 1.5) / 100);
+    return { ahvAlv, bvg, uvg, fak, ktg, nbuv, total: ahvAlv + bvg + uvg + fak + ktg + nbuv };
+  }
+
   return {
     init: init, save: save, getData: getData, setData: setData,
     calcPrivateAusgaben: calcPrivateAusgaben, calcPrivateEinnahmen: calcPrivateEinnahmen, calcMindesteinkommen: calcMindesteinkommen,
     calcInvestitionen: calcInvestitionen, calcBetrieblicheKosten: calcBetrieblicheKosten, calcUmsatz: calcUmsatz,
     calcGewinn: calcGewinn, calcLiquiditaet: calcLiquiditaet, calcStundensatz: calcStundensatz, calcEinkommenssteuer: calcEinkommenssteuer, calcProduktkalkulation: calcProduktkalkulation,
+    calcSozialabgabenArbeitgeber: calcSozialabgabenArbeitgeber,
     calcInvestitionenJahr2: calcInvestitionenJahr2, calcBetrieblicheKostenJahr2: calcBetrieblicheKostenJahr2, calcUmsatzJahr2: calcUmsatzJahr2, calcGewinnJahr2: calcGewinnJahr2, calcLiquiditaetJahr2: calcLiquiditaetJahr2,
     exportJSON: exportJSON, importJSON: importJSON, exportPDF: exportPDF, showStatus: showStatus,
     fmt: fmt, fmtInt: fmtInt, parseVal: parseVal, monatlicherBetrag: monatlicherBetrag, zahlweiseFaktor: zahlweiseFaktor,

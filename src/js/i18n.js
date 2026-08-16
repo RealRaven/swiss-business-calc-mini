@@ -390,6 +390,12 @@ const Lang = (function() {
       private_salary_label: 'Netto-Gehalt Geschäftsführer',
       private_hint_person: 'Bei Personengesellschaften ist dies Ihre private Entnahme. Sie wird nicht als Betriebskosten erfasst, aber in der Liquiditätsplanung berücksichtigt.',
       private_hint_corp: 'Bei Kapitalgesellschaften (GmbH, AG etc.) muss der Geschäftsführerlohn unter Betriebskosten → Personal erfasst werden. Dieser Wert dient nur Ihrer privaten Planung.',
+      profit_ahv_hint_corp: 'Geschätzter Arbeitgeberanteil AHV/IV/EO/ALV/BVG/UVG/FAK/KTG basierend auf Personalkosten. Tatsächlicher Satz variiert nach Kanton, Pensionskasse und Branche.',
+      profit_capital_tax: 'Kapitalsteuer',
+      profit_capital_tax_desc: 'Auf das Eigenkapital (nicht in allen Kantonen mit GewSt. verrechnet)',
+      masterdata_label_equity: 'Eigenkapital / Steuerkapital (CHF)',
+      costs_corp_hint: 'Kapitalgesellschaft ({{rf}}): Ihr eigener Geschäftsführerlohn (Brutto inkl. Arbeitgeber-Sozialabgaben) gehört in die Kategorie <em>1. Personal</em>. Erfassen Sie ihn nicht im Privatbudget als Betriebskosten.',
+      costs_insurance_hint: '🇨🇭 Pflichtversicherungen: Bei Arbeitnehmenden sind BVG (Berufliche Vorsorge) und UVG (Unfallversicherung) obligatorisch. Budgetieren Sie diese unter <em>14. Betriebsversicherungen</em>.',
     },
     en: {
       brand: 'Business Calculation Switzerland',
@@ -774,6 +780,12 @@ const Lang = (function() {
       private_salary_label: 'Net Salary (Managing Director)',
       private_hint_person: 'For sole proprietorships and partnerships, this is your private withdrawal. It is not recorded as an operating cost, but is considered in liquidity planning.',
       private_hint_corp: 'For corporations (GmbH, AG etc.), the managing director salary must be recorded under Operating Costs → Personnel. This value is for your private planning only.',
+      profit_ahv_hint_corp: 'Estimated employer share AHV/IV/EO/ALV/BVG/UVG/FAK/KTG based on personnel costs. Actual rate varies by canton, pension fund and industry.',
+      profit_capital_tax: 'Capital Tax',
+      profit_capital_tax_desc: 'On net equity (not credited against profit tax in all cantons)',
+      masterdata_label_equity: 'Equity / Taxable Capital (CHF)',
+      costs_corp_hint: 'Capital company ({{rf}}): Your own managing director salary (gross incl. employer social contributions) belongs in category <em>1. Personnel</em>. Do not record it in the private budget as operating costs.',
+      costs_insurance_hint: '🇨🇭 Mandatory insurance: For employees, BVG (occupational pension) and UVG (accident insurance) are mandatory. Budget these under <em>14. Business Insurance</em>.',
     },
     fr: {
       brand: "Calcul d'entreprise Suisse",
@@ -1158,6 +1170,12 @@ const Lang = (function() {
       private_salary_label: 'Salaire net (gérant)',
       private_hint_person: 'Pour les entreprises individuelles et sociétés de personnes, il s\'agit de votre prélèvement privé. Il n\'est pas comptabilisé en charges, mais pris en compte dans la planification de liquidité.',
       private_hint_corp: 'Pour les sociétés de capitaux (Sàrl, SA etc.), le salaire de gérant doit être enregistré sous Coûts d\'exploitation → Personnel. Cette valeur sert uniquement à votre planification privée.',
+      profit_ahv_hint_corp: 'Part employeur estimée AVS/AI/APG/AC/LPP/LAA/CAF/IJ basée sur les coûts du personnel. Taux réel variable selon le canton, caisse de pension et secteur.',
+      profit_capital_tax: 'Impôt sur le capital',
+      profit_capital_tax_desc: 'Sur les fonds propres (pas crédité contre l\'impôt sur les bénéfices dans tous les cantons)',
+      masterdata_label_equity: 'Fonds propres / Capital imposable (CHF)',
+      costs_corp_hint: 'Société de capitaux ({{rf}}) : Le salaire de votre propre gérant (brut incl. cotisations sociales employeur) appartient à la catégorie <em>1. Personnel</em>. Ne le comptabilisez pas dans le budget privé comme frais d\'exploitation.',
+      costs_insurance_hint: '🇨🇭 Assurances obligatoires : Pour les employés, la LPP (prévoyance professionnelle) et la LAA (assurance-accidents) sont obligatoires. Budgetisez-les sous <em>14. Assurances entreprise</em>.',
     },
     it: {
       brand: "Calcolo d'impresa Svizzera",
@@ -1542,6 +1560,12 @@ const Lang = (function() {
       private_salary_label: 'Stipendio netto (amministratore)',
       private_hint_person: 'Per ditte individuali e società di persone, questo è il vostro prelievo privato. Non è registrato come costo operativo, ma è considerato nella pianificazione della liquidità.',
       private_hint_corp: 'Per società di capitali (GmbH, SA ecc.), lo stipendio dell\'amministratore deve essere registrato sotto Costi operativi → Personale. Questo valore serve solo alla vostra pianificazione privata.',
+      profit_ahv_hint_corp: 'Quota datore di lavoro stimata AVS/AI/IPG/AD/LPP/LAA/CAF/IM basata sui costi del personale. Tasso effettivo variabile per cantone, cassa pensione e settore.',
+      profit_capital_tax: 'Imposta sul capitale',
+      profit_capital_tax_desc: 'Sul capitale proprio (non compensata con l\'imposta sugli utili in tutti i cantoni)',
+      masterdata_label_equity: 'Capitale proprio / Capitale fiscale (CHF)',
+      costs_corp_hint: 'Società di capitali ({{rf}}): Lo stipendio del proprio amministratore (lordo incl. contributi sociali datore di lavoro) appartiene alla categoria <em>1. Personale</em>. Non registrarlo nel budget privato come costo operativo.',
+      costs_insurance_hint: '🇨🇭 Assicurazioni obbligatorie: Per i dipendenti, la LPP (previdenza professionale) e la LAA (assicurazione infortuni) sono obbligatorie. Budgettatele sotto <em>14. Assicurazioni aziendali</em>.',
     }
   };
 

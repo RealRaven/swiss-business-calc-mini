@@ -87,6 +87,13 @@
       <div class="grid grid-2">
         <table>
           <tr><td data-i18n="profit_ahv_iv_eo">AHV / IV / EO (12.5 %)</td><td class="num" id="g-ahv">0.00</td></tr>
+          <tr id="ahv-hint-corp" style="display:none;">
+            <td colspan="2" style="font-size:0.78rem;color:var(--text-muted);padding-top:0;padding-bottom:0.5rem;" data-i18n="profit_ahv_hint_corp"></td>
+          </tr>
+          <tr id="row-kst" style="display:none;"><td data-i18n="profit_capital_tax">Kapitalsteuer</td><td class="num" id="g-kst">0.00</td></tr>
+          <tr id="row-kst-desc" style="display:none;">
+            <td colspan="2" style="font-size:0.78rem;color:var(--text-muted);padding-top:0;padding-bottom:0.5rem;" data-i18n="profit_capital_tax_desc"></td>
+          </tr>
           <tr><td data-i18n="profit_tax_base">Bemessungsgrundlage ESt.</td><td class="num" id="g-est-bmg">0.00</td></tr>
           <tr><td data-i18n="profit_income_tax">Einkommenssteuer (vereinfacht)</td><td class="num" id="g-est">0.00</td></tr>
         </table>
@@ -169,9 +176,28 @@ function tRechtsform(rf) {
   document.getElementById('g-kosten').textContent = App.fmt(g.kosten.gesamtJaehrlich);
   document.getElementById('g-afa').textContent = App.fmt(g.afa);
   document.getElementById('g-ergebnis').textContent = App.fmt(g.betriebsergebnis);
-  document.getElementById('g-ahv').textContent = App.fmt(g.ahvIvEo);
+
+  // FIX: Show salary-based AHV for corps, profit-based AHV for sole props
+  document.getElementById('g-ahv').textContent = App.fmt(g.isPersonengesellschaft ? g.ahvIvEo : (g.ahvLohn || 0));
+  const ahvHint = document.getElementById('ahv-hint-corp');
+  if (ahvHint) ahvHint.style.display = g.isPersonengesellschaft ? 'none' : 'table-row';
+
   document.getElementById('g-est-bmg').textContent = App.fmt(Math.max(0, g.betriebsergebnis - g.ahvIvEo));
   document.getElementById('g-est').textContent = App.fmt(g.est);
+
+  // Kapitalsteuer anzeigen (nur Kapitalgesellschaften)
+  const kstRow = document.getElementById('row-kst');
+  const kstDescRow = document.getElementById('row-kst-desc');
+  if (kstRow) {
+    if (!g.isPersonengesellschaft && g.kapitalsteuer > 0) {
+      kstRow.style.display = 'table-row';
+      if (kstDescRow) kstDescRow.style.display = 'table-row';
+      document.getElementById('g-kst').textContent = App.fmt(g.kapitalsteuer);
+    } else {
+      kstRow.style.display = 'none';
+      if (kstDescRow) kstDescRow.style.display = 'none';
+    }
+  }
   document.getElementById('g-netto-gewinn').textContent = 'CHF ' + App.fmt(g.netto);
   document.getElementById('g-mindest').textContent = 'CHF ' + App.fmt(g.mindest.jaehrlich);
 

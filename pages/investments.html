@@ -61,7 +61,7 @@
     <div class="card-body">
       <div class="table-wrap">
         <table id="tbl-bestehend"><thead><tr>
-          <th data-i18n="invest_col_desc">Bezeichnung</th>
+          <th data-i18n="invest_col_desc" style="width:55%">Bezeichnung</th>
           <th data-i18n="invest_col_residual_value">Restwert CHF</th>
           <th data-i18n="invest_col_nd_years">ND (Jahre)</th>
           <th data-i18n="invest_col_afa_year">AfA / Jahr</th>
@@ -76,8 +76,10 @@
     <div class="card-body">
       <div class="table-wrap">
         <table id="tbl-neu"><thead><tr>
-          <th data-i18n="invest_col_desc">Bezeichnung</th>
+          <th data-i18n="invest_col_desc" style="width:30%">Bezeichnung</th>
           <th data-i18n="invest_col_amount_gross">Betrag brutto CHF</th>
+          <th data-i18n="invest_col_vat_pct">MWST %</th>
+          <th data-i18n="invest_col_amount_net">Betrag netto CHF</th>
           <th data-i18n="invest_col_nd_years">ND (Jahre)</th>
           <th data-i18n="invest_col_afa_year">AfA / Jahr</th>
         </tr></thead><tbody></tbody></table>
@@ -91,7 +93,7 @@
     <div class="card-body">
       <div class="table-wrap">
         <table id="tbl-gruendung"><thead><tr>
-          <th data-i18n="invest_col_desc">Bezeichnung</th>
+          <th data-i18n="invest_col_desc" style="width:55%">Bezeichnung</th>
           <th data-i18n="invest_col_amount_net">Betrag netto CHF</th>
           <th data-i18n="invest_col_vat_pct">MWST %</th>
           <th data-i18n="invest_col_amount_gross">Betrag brutto CHF</th>
@@ -116,6 +118,13 @@
 <script src="../src/js/i18n.js"></script>
 <script src="../src/js/app.js"></script>
 <script>
+const mwstOptionen = [
+  {v:8.1, k:'vat_normal'},
+  {v:2.6, k:'vat_reduced'},
+  {v:3.8, k:'vat_special'},
+  {v:0, k:'vat_exempt'}
+];
+
 function render() {
   const d = App.getData().investitionen;
   const tbodyAlt = document.querySelector('#tbl-bestehend tbody');
@@ -131,11 +140,15 @@ function render() {
   const tbodyNeu = document.querySelector('#tbl-neu tbody');
   tbodyNeu.innerHTML = '';
   d.neu.forEach((row, i) => {
+    const mwst = App.parseVal(row.mwst) || 0;
+    const netto = mwst > 0 ? row.betrag_brutto / (1 + mwst/100) : row.betrag_brutto;
     const tr = document.createElement('tr');
     tr.innerHTML = '<td><input class="form-control" value="' + row.bezeichnung + '" data-type="neu" data-idx="' + i + '" data-f="bezeichnung"></td>' +
       '<td><input type="number" class="form-control" value="' + row.betrag_brutto + '" data-type="neu" data-idx="' + i + '" data-f="betrag_brutto"></td>' +
+      '<td><select class="form-control" data-type="neu" data-idx="' + i + '" data-f="mwst">' + mwstOptionen.map(o => '<option value="' + o.v + '"' + (Math.abs(o.v - mwst)<0.01?' selected':'') + '>' + App.t(o.k) + '</option>').join('') + '</select></td>' +
+      '<td class="num">' + App.fmt(netto) + '</td>' +
       '<td><input type="number" class="form-control" value="' + row.nd + '" data-type="neu" data-idx="' + i + '" data-f="nd"></td>' +
-      '<td class="num">' + App.fmt(row.betrag_brutto / (row.nd || 1)) + '</td>';
+      '<td class="num">' + App.fmt(netto / (row.nd || 1)) + '</td>';
     tbodyNeu.appendChild(tr);
   });
   const tbodyG = document.querySelector('#tbl-gruendung tbody');
@@ -154,7 +167,7 @@ function render() {
 }
 
 function bindInputs() {
-  document.querySelectorAll('input[data-type]').forEach(el => {
+  document.querySelectorAll('input[data-type], select[data-type]').forEach(el => {
     el.onchange = () => {
       const d = App.getData().investitionen;
       const type = el.dataset.type, idx = parseInt(el.dataset.idx), f = el.dataset.f;
@@ -170,7 +183,7 @@ function bindInputs() {
 function addRow(type) {
   const d = App.getData().investitionen;
   if (type === 'bestehend') d.bestehende.push({bezeichnung:'', restwert:0, nd:3, afa:0});
-  else if (type === 'neu') d.neu.push({bezeichnung:'', betrag_brutto:0, nd:3, afa:0});
+  else if (type === 'neu') d.neu.push({bezeichnung:'', betrag_brutto:0, mwst:8.1, nd:3, afa:0});
   else if (type === 'gruendung') d.gruendungskosten.push({bezeichnung:'', betrag_netto:0, mwst:8.1});
   App.save(); render();
 }

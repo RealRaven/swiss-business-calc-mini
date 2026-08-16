@@ -20,7 +20,8 @@
     "mwst_pflichtig": true,
     "mwst_satz_normal": 8.1,
     "mwst_satz_ermaessigt": 2.6,
-    "mwst_satz_spezial": 3.8
+    "mwst_satz_spezial": 3.8,
+    "eigenkapital": 0
   },
   "private_ausgaben": {
     "haushaltstyp": "gesamter_haushalt",
@@ -401,6 +402,18 @@
             "betrag": 0,
             "zahlweise": "jaerlich",
             "startmonat": 1
+          },
+          {
+            "bezeichnung": "BVG / Berufliche Vorsorge (Arbeitgeberanteil)",
+            "betrag": 0,
+            "zahlweise": "monatlich",
+            "startmonat": 1
+          },
+          {
+            "bezeichnung": "UVG / Unfallversicherung (obligatorisch)",
+            "betrag": 0,
+            "zahlweise": "monatlich",
+            "startmonat": 1
           }
         ]
       },
@@ -515,63 +528,36 @@
     "ahv_iv_eo_total": 12.5,
     "alv_optional": 2.2,
     "krankenkasse_gesch": 300,
+    "bvg_arbeitgeber_satz": 4.0,
+    "uvg_satz": 1.5,
+    "fak_satz": 0.5,
+    "ktg_satz": 1.0,
+    "nbuv_satz": 1.5,
     "einkommenssteuer": {
       "progressionsstufen": [
-        {
-          "bis": 20000,
-          "satz": 0
-        },
-        {
-          "bis": 40000,
-          "satz": 0.02
-        },
-        {
-          "bis": 80000,
-          "satz": 0.06
-        },
-        {
-          "bis": 120000,
-          "satz": 0.1
-        },
-        {
-          "bis": 200000,
-          "satz": 0.15
-        },
-        {
-          "bis": 999999999,
-          "satz": 0.2
-        }
+        { "bis": 20000, "satz": 0 },
+        { "bis": 40000, "satz": 0.02 },
+        { "bis": 80000, "satz": 0.06 },
+        { "bis": 120000, "satz": 0.1 },
+        { "bis": 200000, "satz": 0.15 },
+        { "bis": 999999999, "satz": 0.2 }
       ],
       "hinweis": "Kantonale Unterschiede möglich - Richtwerte"
     },
     "gewinnsteuer_kantone": {
-      "ZH": 19.6,
-      "BE": 20.5,
-      "LU": 12.2,
-      "UR": 12.6,
-      "SZ": 14.1,
-      "OW": 12.7,
-      "NW": 12.0,
-      "GL": 13.3,
-      "ZG": 11.9,
-      "FR": 13.7,
-      "SO": 13.0,
-      "BS": 13.0,
-      "BL": 16.0,
-      "SH": 13.8,
-      "AR": 13.0,
-      "AI": 12.7,
-      "SG": 14.5,
-      "GR": 14.0,
-      "AG": 15.1,
-      "TG": 13.4,
-      "TI": 16.0,
-      "VD": 14.0,
-      "VS": 17.1,
-      "NE": 13.6,
-      "GE": 14.7,
-      "JU": 15.4
-    }
+      "ZH": 19.47, "BE": 20.54, "LU": 11.66, "UR": 12.6, "SZ": 14.1,
+      "OW": 12.7, "NW": 12.0, "GL": 13.3, "ZG": 11.71, "FR": 13.7,
+      "SO": 13.0, "BS": 13.0, "BL": 16.0, "SH": 13.8, "AR": 13.0,
+      "AI": 12.7, "SG": 14.5, "GR": 14.0, "AG": 15.0, "TG": 13.4,
+      "TI": 16.0, "VD": 14.0, "VS": 17.1, "NE": 13.6, "GE": 14.7, "JU": 15.4
+    },
+    "kapitalsteuer_kantone": {
+      "ZH": 0.25, "BE": 0.25, "LU": 0.15, "UR": 0.10, "SZ": 0.05, "OW": 0.10, "NW": 0.10,
+      "GL": 0.35, "ZG": 0.04, "FR": 0.16, "SO": 0.20, "BS": 0.20, "BL": 0.25, "SH": 0.15,
+      "AR": 0.15, "AI": 0.15, "SG": 0.15, "GR": 0.488, "AG": 0.20, "TG": 0.15, "TI": 0.15,
+      "VD": 0.30, "VS": 0.20, "NE": 0.10, "GE": 0.15, "JU": 0.18
+    },
+    "kapitalsteuer_ohne_verrechnung": ["ZG"]
   },
   "liquiditaet": {
     "startguthaben": 0,

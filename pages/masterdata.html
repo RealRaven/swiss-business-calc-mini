@@ -79,6 +79,7 @@
         </div>
         <div class="form-group"><label data-i18n="masterdata_label_founding_year">Gründungsjahr</label><input type="number" class="form-control" id="st-jahr"></div>
         <div class="form-group"><label data-i18n="masterdata_label_founding_month">Gründungsmonat (1-12)</label><input type="number" class="form-control" id="st-monat" min="1" max="12"></div>
+        <div class="form-group"><label data-i18n="masterdata_label_equity">Eigenkapital / Steuerkapital (CHF)</label><input type="number" class="form-control" id="st-eigenkapital"></div>
         <div class="form-group"><label data-i18n="masterdata_label_commercial">Gewerbebetrieb</label>
           <select class="form-control" id="st-gewerbe"><option value="1" data-i18n="masterdata_yes">Ja</option><option value="0" data-i18n="masterdata_no">Nein</option></select>
         </div>
@@ -115,7 +116,7 @@ function initPage() {
     'st-rechtsform': d.rechtsform, 'st-kanton': d.kanton,
     'st-jahr': d.gruendungsjahr, 'st-monat': d.gruendungsmonat,
     'st-gewerbe': d.gewerbe ? '1' : '0', 'st-mwst': d.mwst_pflichtig ? '1' : '0',
-    'st-mwst-n': d.mwst_satz_normal, 'st-mwst-e': d.mwst_satz_ermaessigt, 'st-mwst-s': d.mwst_satz_spezial
+    'st-eigenkapital': d.eigenkapital || 0, 'st-mwst-n': d.mwst_satz_normal, 'st-mwst-e': d.mwst_satz_ermaessigt, 'st-mwst-s': d.mwst_satz_spezial
   };
   for (let id in fields) { const el = document.getElementById(id); if(el) el.value = fields[id]; }
   const bind = (id, path) => {
@@ -133,7 +134,7 @@ function initPage() {
   bind('st-rechtsform',['rechtsform']); bind('st-kanton',['kanton']);
   bind('st-jahr',['gruendungsjahr']); bind('st-monat',['gruendungsmonat']);
   bind('st-gewerbe',['gewerbe']); bind('st-mwst',['mwst_pflichtig']);
-  bind('st-mwst-n',['mwst_satz_normal']); bind('st-mwst-e',['mwst_satz_ermaessigt']); bind('st-mwst-s',['mwst_satz_spezial']);
+  bind('st-eigenkapital',['eigenkapital']); bind('st-mwst-n',['mwst_satz_normal']); bind('st-mwst-e',['mwst_satz_ermaessigt']); bind('st-mwst-s',['mwst_satz_spezial']);
 }
 window.pageInit = initPage;
 </script>
